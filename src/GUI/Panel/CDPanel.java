@@ -3,6 +3,7 @@ package GUI.Panel;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.util.List;
@@ -12,19 +13,22 @@ import GUI.component.ButtonAction.EditButtonAction;
 import GUI.component.ButtonUI.*;
 import GUI.component.CustomTable.CustomTableCellRenderer;
 import GUI.dialog.addDialog.AddCDDialog;
+import GUI.dialog.viewDialog.ViewCDDialog;
+import GUI.Session;
 import Interface.ReloadablePanel;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 // CDPanel - Quản lý danh sách CD
-public class CDPanel extends JPanel implements ReloadablePanel{
+public class CDPanel extends JPanel implements ReloadablePanel {
     private JTable table;
     private DefaultTableModel tableModel;
     private JButton btnAdd;
     private CDDAO cdDAO;
 
     public CDPanel() {
+        boolean canManage = Session.isAdminFlag || Session.isManagerFlag;
         setLayout(new BorderLayout(10, 10));
         cdDAO = new CDDAO();
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -55,12 +59,9 @@ public class CDPanel extends JPanel implements ReloadablePanel{
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         table.getTableHeader().setBackground(new Color(220, 220, 220));
         table.getTableHeader().setReorderingAllowed(false);
-        
+
         // Cố định kích thước cột Hành động
         TableColumn actionColumn = table.getColumnModel().getColumn(5);
-        actionColumn.setPreferredWidth(150);
-        actionColumn.setMaxWidth(180);
-        actionColumn.setMinWidth(180);
 
         JScrollPane scrollPane = new JScrollPane(table);
 
@@ -76,14 +77,31 @@ public class CDPanel extends JPanel implements ReloadablePanel{
         table.setSelectionBackground(table.getBackground());
         table.setSelectionForeground(table.getForeground());
 
+        if (canManage) {
+            // Admin/Manager: edit/delete
+            btnAdd.setVisible(true);
+            actionColumn.setPreferredWidth(150);
+            table.getColumnModel().getColumn(5).setCellRenderer(new EditButtonRenderer());
+            table.getColumnModel().getColumn(5).setCellEditor(new EditButtonAction(table, this));
+        } else {
+            btnAdd.setVisible(false);
+            // render Details button in action column
+            table.getColumnModel().getColumn(5).setCellRenderer((TableCellRenderer) (tbl, val, sel, focus, r, c) -> new JButton("Chi Tiết"));
+            // handle Details clicks
+            table.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    int col = table.columnAtPoint(e.getPoint());
+                    int row = table.rowAtPoint(e.getPoint());
+                    if (col == 5 && row >= 0) {
+                        int modelRow = table.convertRowIndexToModel(row);
+                        int productId = (int) tableModel.getValueAt(modelRow, 0);
+                        CD cd = cdDAO.getCDInfor(productId);
+                        new ViewCDDialog((Frame) SwingUtilities.getWindowAncestor(CDPanel.this), cd).setVisible(true);
+                    }
+                }
+            });
+        }
 
-        // Đặt renderer cho cột cuối cùng (Hành động)
-        // Áp dụng EditButtonRenderer và EditButtonAction
-        table.getColumnModel().getColumn(5).setCellRenderer(new EditButtonRenderer());
-        table.getColumnModel().getColumn(5).setCellEditor(new EditButtonAction(table, this));
-
-
-        
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         for (int i = 0; i < table.getColumnCount() - 1; i++) {
@@ -100,7 +118,7 @@ public class CDPanel extends JPanel implements ReloadablePanel{
                 AddCDDialog addCDDialog = new AddCDDialog(parentFrame, "Thêm CD", true); // Thêm title và modal
                 addCDDialog.setVisible(true);
                 if (addCDDialog.isSaveClicked()) { // Kiểm tra nếu nút "Lưu" đã được nhấn (nếu bạn đã thêm logic này vào AddBookDialog)
-                loadCDs();
+                    loadCDs();
                 }
             }
         });

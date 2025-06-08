@@ -6,18 +6,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LPDAO extends ProductDAO {
+    private static LPDAO instance;
+
+    public static LPDAO getInstance() {
+        if (instance == null) {
+            instance = new LPDAO();
+        }
+        return instance;
+    }
+
     // lay thong tin LP
-    public LP getLPInfor (int product_id){
+    public LP getLPInfor(int product_id) {
         LP lp = null;
         String sql = "SELECT p.product_id, p.title, p.category, p.value, p.price," +
-                     "p.barcode, p.description, p.quantity, p.weight, p.dimensions, p.warehouse_entry_date," +
-                     "l.artists, l.record_label, l.tracklist, l.genre, l.release_date " +
-                     "FROM products p " +
-                     "INNER JOIN lps l ON p.product_id = l.lp_id " +
-                     "WHERE p.category = 'LP' AND p.product_id = ? ";
+                "p.barcode, p.description, p.quantity, p.weight, p.dimensions, p.warehouse_entry_date," +
+                "l.artists, l.record_label, l.tracklist, l.genre, l.release_date " +
+                "FROM products p " +
+                "INNER JOIN lps l ON p.product_id = l.lp_id " +
+                "WHERE p.category = 'LP' AND p.product_id = ? ";
 
-        try(Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)){
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, product_id);
             ResultSet rs = stmt.executeQuery();
@@ -47,15 +56,15 @@ public class LPDAO extends ProductDAO {
         }
         return lp;
     }
-    
+
     // Cập nhật LP
     public boolean updateLP(LP lp) {
         String updateProductSql = "UPDATE Products SET title = ?, value = ?, price = ?, barcode = ?, " +
-                                  "description = ?, quantity = ?, weight = ?, dimensions = ?, warehouse_entry_date = ? " +
-                                  "WHERE product_id = ?";
+                "description = ?, quantity = ?, weight = ?, dimensions = ?, warehouse_entry_date = ? " +
+                "WHERE product_id = ?";
 
         String updateLPSql = "UPDATE LPs SET artists = ?, record_label = ?, tracklist = ?, " +
-                             "genre = ?, release_date = ? WHERE lp_id = ?";
+                "genre = ?, release_date = ? WHERE lp_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement productStmt = conn.prepareStatement(updateProductSql);
@@ -68,7 +77,15 @@ public class LPDAO extends ProductDAO {
             productStmt.setString(4, lp.getBarcode());
             productStmt.setString(5, lp.getDescription());
             productStmt.setInt(6, lp.getQuantity());
-            productStmt.setString(7, lp.getWeight());
+            // Parse weight as double for numeric column
+            double weightValue = 0.0;
+            try {
+                weightValue = Double.parseDouble(lp.getWeight());
+            } catch (NumberFormatException e) {
+                System.out.println("[LPDAO] Invalid weight format: " + lp.getWeight());
+                return false;
+            }
+            productStmt.setDouble(7, weightValue);
             productStmt.setString(8, lp.getDimensions());
             productStmt.setDate(9, java.sql.Date.valueOf(lp.getWarehouseEntryDate()));
             productStmt.setInt(10, lp.getProductId());
@@ -94,42 +111,42 @@ public class LPDAO extends ProductDAO {
     public List<LP> getAllLPs() {
         List<LP> lps = new ArrayList<>();
         String sql = "SELECT p.product_id, p.title, p.category, p.value, p.price, p.barcode, " +
-                     "p.description, p.quantity, p.weight, p.dimensions, p.warehouse_entry_date, " +
-                     "l.artists, l.record_label, l.tracklist, l.genre, l.release_date " +
-                     "FROM Products p " +
-                     "INNER JOIN LPs l ON p.product_id = l.lp_id " +
-                     "WHERE p.category = 'LP'";
-    
+                "p.description, p.quantity, p.weight, p.dimensions, p.warehouse_entry_date, " +
+                "l.artists, l.record_label, l.tracklist, l.genre, l.release_date " +
+                "FROM Products p " +
+                "INNER JOIN LPs l ON p.product_id = l.lp_id " +
+                "WHERE p.category = 'LP'";
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
-    
+
             while (rs.next()) {
                 LP lp = new LP(
-                    rs.getInt("product_id"),
-                    rs.getString("title"),
-                    rs.getString("category"), // Đảm bảo bạn chọn cột 'category' trong truy vấn
-                    rs.getDouble("value"),
-                    rs.getDouble("price"),
-                    rs.getString("barcode"),
-                    rs.getString("description"),
-                    rs.getInt("quantity"),
-                    rs.getString("weight"),
-                    rs.getString("dimensions"),
-                    rs.getString("warehouse_entry_date"),
-                    rs.getString("artists"),
-                    rs.getString("record_label"),
-                    rs.getString("tracklist"),
-                    rs.getString("genre"),
-                    rs.getString("release_date")
+                        rs.getInt("product_id"),
+                        rs.getString("title"),
+                        rs.getString("category"), // Đảm bảo bạn chọn cột 'category' trong truy vấn
+                        rs.getDouble("value"),
+                        rs.getDouble("price"),
+                        rs.getString("barcode"),
+                        rs.getString("description"),
+                        rs.getInt("quantity"),
+                        rs.getString("weight"),
+                        rs.getString("dimensions"),
+                        rs.getString("warehouse_entry_date"),
+                        rs.getString("artists"),
+                        rs.getString("record_label"),
+                        rs.getString("tracklist"),
+                        rs.getString("genre"),
+                        rs.getString("release_date")
                 );
                 lps.add(lp);
             }
-    
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    
+
         return lps;
     }
 
@@ -137,7 +154,7 @@ public class LPDAO extends ProductDAO {
         String barcode;
         boolean isUnique = false;
         do {
-            barcode = String.format("%013d", (long)(Math.random() * 1_000_000_000_0000L));
+            barcode = String.format("%013d", (long) (Math.random() * 1_000_000_000_0000L));
             String checkSql = "SELECT COUNT(*) FROM Products WHERE barcode = ?";
             try (PreparedStatement stmt = conn.prepareStatement(checkSql)) {
                 stmt.setString(1, barcode);
@@ -148,57 +165,82 @@ public class LPDAO extends ProductDAO {
             }
         } while (!isUnique);
         return barcode;
-    }    
-    
+    }
+
     public boolean addLP(LP lp) {
         String productSQL = "INSERT INTO Products (title, category, value, price, barcode, description, quantity, weight, dimensions, warehouse_entry_date) " +
-                            "VALUES (?, 'LP', ?, ?, ?, ?, ?, ?, ?, ?) RETURNING product_id";
+                "VALUES (?, 'LP', ?, ?, ?, ?, ?, ?, ?, ?) RETURNING product_id";
         String lpSQL = "INSERT INTO LPs (lp_id, artists, record_label, tracklist, genre, release_date) " +
-                       "VALUES (?, ?, ?, ?, ?, ?)";
-    
+                "VALUES (?, ?, ?, ?, ?, ?)";
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement productStmt = conn.prepareStatement(productSQL);
              PreparedStatement lpStmt = conn.prepareStatement(lpSQL)) {
-    
+
             String barcode = generateUniqueBarcode(conn);
             lp.setBarcode(barcode);
-    
+
             productStmt.setString(1, lp.getTitle());
             productStmt.setDouble(2, lp.getValue());
             productStmt.setDouble(3, lp.getPrice());
             productStmt.setString(4, barcode);
             productStmt.setString(5, lp.getDescription());
             productStmt.setInt(6, lp.getQuantity());
-            productStmt.setString(7, lp.getWeight());
+            // Parse weight as double for numeric column
+            double weightValue = 0.0;
+            try {
+                weightValue = Double.parseDouble(lp.getWeight());
+            } catch (NumberFormatException e) {
+                System.out.println("[LPDAO] Invalid weight format: " + lp.getWeight());
+                return false;
+            }
+            productStmt.setDouble(7, weightValue);
             productStmt.setString(8, lp.getDimensions());
             productStmt.setDate(9, java.sql.Date.valueOf(lp.getWarehouseEntryDate()));
-    
+
             ResultSet rs = productStmt.executeQuery();
             if (rs.next()) {
                 int productId = rs.getInt(1);
                 lp.setProductId(productId);
-    
+
                 lpStmt.setInt(1, productId);
                 lpStmt.setString(2, lp.getArtists());
                 lpStmt.setString(3, lp.getRecordLabel());
                 lpStmt.setString(4, lp.getTracklist());
                 lpStmt.setString(5, lp.getGenre());
                 lpStmt.setDate(6, java.sql.Date.valueOf(lp.getReleaseDate()));
-    
+
                 return lpStmt.executeUpdate() > 0;
             }
-    
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
     }
-    
+
+    // Xóa LP trước, sau đó xóa Product
+    public boolean deleteLP(int productId) {
+        String sqlLP = "DELETE FROM LPs WHERE lp_id = ?";
+        String sqlProduct = "DELETE FROM Products WHERE product_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtLP = conn.prepareStatement(sqlLP);
+             PreparedStatement stmtProduct = conn.prepareStatement(sqlProduct)) {
+            stmtLP.setInt(1, productId);
+            int lpRows = stmtLP.executeUpdate();
+            stmtProduct.setInt(1, productId);
+            int productRows = stmtProduct.executeUpdate();
+            return lpRows > 0 && productRows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     public LP getLPById(int productId) {
-        String sql = "SELECT * FROM Products JOIN LPs ON Products.product_id = LPs.product_id WHERE Products.product_id = ?";
+        String sql = "SELECT * FROM Products JOIN LPs ON Products.product_id = LPs.lp_id WHERE Products.product_id = ?";
         try (Connection connection = DatabaseConnection.getConnection();
-         PreparedStatement stmt = connection.prepareStatement(sql)) {
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, productId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -210,30 +252,11 @@ public class LPDAO extends ProductDAO {
         return null;
     }
 
-    // so luong LP
-    public static int getLPCount() {
-        int count = 0;
-        String sql = "SELECT COUNT(*) FROM LPs";
-    
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-    
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return count;
-    }
-    
-
     private LP mapResultSetToLP(ResultSet rs) throws SQLException {
         return new LP(
             rs.getInt("product_id"),
             rs.getString("title"),
-            rs.getString("category"), 
+            rs.getString("category"),
             rs.getDouble("value"),
             rs.getDouble("price"),
             rs.getString("barcode"),
@@ -249,13 +272,5 @@ public class LPDAO extends ProductDAO {
             rs.getString("release_date")
         );
     }
-
-    private static LPDAO instance;
-
-    public static LPDAO getInstance() {
-        if (instance == null) {
-            instance = new LPDAO();
-        }
-        return instance;
-    }
 }
+

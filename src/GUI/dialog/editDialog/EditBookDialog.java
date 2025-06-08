@@ -382,7 +382,7 @@ public class EditBookDialog extends JDialog {
             // Gọi DAO để lưu vào database
             boolean success = BookDAO.getInstance().updateBook(book);
             if (success) {
-                JOptionPane.showMessageDialog(this, "Thêm sách thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Sửa thông tin sách thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 isSaveClicked = true;
                 dispose(); // Đóng dialog
             } else {

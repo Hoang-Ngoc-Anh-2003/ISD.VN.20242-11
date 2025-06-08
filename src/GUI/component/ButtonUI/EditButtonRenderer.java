@@ -19,7 +19,10 @@ public class EditButtonRenderer extends JPanel implements TableCellRenderer {
 
         add(btnEdit);
         add(btnDelete);
-    
+        // match cell background
+        setBackground(table.getBackground());
+        setOpaque(true);
+
         return this;
     }
 }

@@ -10,6 +10,11 @@ public class DatabaseConnection {
     private static final String PASSWORD = "admin"; // Thay bằng mật khẩu của bạn
 
     public static Connection getConnection() throws SQLException {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("PostgreSQL JDBC Driver not found.", e);
+        }
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }

@@ -63,4 +63,12 @@ public class CD extends Product {
     public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
     }
+
+    public String getImportDate() {
+        return getWarehouseEntryDate();
+    }
+
+    public void setImportDate(String date) {
+        setWarehouseEntryDate(date);
+    }
 }

@@ -62,7 +62,9 @@ public class AddLPDialog extends JDialog {
         gbcLP.gridx = 1;
         gbcLP.gridy = 0;
         gbcLP.insets = fieldMargin;
-        LPInfoPanel.add(titleTextField = new JTextField(20), gbcLP);
+        titleTextField = new JTextField(20);
+        titleTextField.setText("LP mới");
+        LPInfoPanel.add(titleTextField, gbcLP);
 
         gbcLP.gridx = 2;
         gbcLP.gridy = 0;
@@ -73,6 +75,7 @@ public class AddLPDialog extends JDialog {
         gbcLP.gridy = 0;
         gbcLP.insets = fieldMargin;
         recordLabelTextField = new JTextField(20);
+        recordLabelTextField.setText("Hãng thu mới");
         LPInfoPanel.add(recordLabelTextField, gbcLP);
 
         // Hàng 2: Nghệ sĩ - Thể loại
@@ -84,7 +87,9 @@ public class AddLPDialog extends JDialog {
         gbcLP.gridx = 1;
         gbcLP.gridy = 1;
         gbcLP.insets = fieldMargin;
-        LPInfoPanel.add(artistTextField = new JTextField(20), gbcLP);
+        artistTextField = new JTextField(20);
+        artistTextField.setText("Nghệ sĩ mới");
+        LPInfoPanel.add(artistTextField, gbcLP);
 
         gbcLP.gridx = 2;
         gbcLP.gridy = 1;
@@ -95,6 +100,7 @@ public class AddLPDialog extends JDialog {
         gbcLP.gridy = 1;
         gbcLP.insets = fieldMargin;
         genreTextField = new JTextField(20);
+        genreTextField.setText("Pop");
         LPInfoPanel.add(genreTextField, gbcLP);
 
         // Hàng 3: Ngày phát hành - Danh sách bài hát
@@ -104,12 +110,13 @@ public class AddLPDialog extends JDialog {
         gbcLP.anchor = GridBagConstraints.NORTHWEST; // Neo label lên trên
         LPInfoPanel.add(new JLabel("Ngày phát hành :"), gbcLP);
 
+        releaseDateTextField = new JFormattedTextField();
+        releaseDateTextField.setText("2025-01-01");
+        releaseDateTextField.setColumns(20);
         gbcLP.gridx = 1;
         gbcLP.gridy = 2;
         gbcLP.insets = fieldMargin;
         gbcLP.anchor = GridBagConstraints.NORTHWEST; // Neo textField lên trên
-        releaseDateTextField = new JFormattedTextField();
-        releaseDateTextField.setColumns(20);
         LPInfoPanel.add(releaseDateTextField, gbcLP);
         gbcLP.anchor = GridBagConstraints.WEST; // Trả lại anchor mặc định
 
@@ -119,13 +126,15 @@ public class AddLPDialog extends JDialog {
         gbcLP.anchor = GridBagConstraints.NORTHWEST; // Neo label lên trên
         LPInfoPanel.add(new JLabel("Danh sách bài hát :"), gbcLP);
 
+        trackListTextArea = new JTextArea(3, 20);
+        trackListTextArea.setText("Bài hát 1, Bài hát 2");
         gbcLP.gridx = 3;
         gbcLP.gridy = 2;
         gbcLP.gridwidth = GridBagConstraints.REMAINDER; // Chiếm toàn bộ không gian còn lại bên phải
         gbcLP.gridheight = 2; // Cho phép JTextArea có chiều cao 2 hàng (hoặc hơn nếu cần)
         gbcLP.insets = fieldMargin;
         gbcLP.fill = GridBagConstraints.BOTH; // Lấp đầy cả chiều ngang và dọc
-        LPInfoPanel.add(new JScrollPane(trackListTextArea = new JTextArea(3, 20)), gbcLP);
+        LPInfoPanel.add(new JScrollPane(trackListTextArea), gbcLP);
         gbcLP.gridwidth = 1; // Trả lại gridwidth mặc định
         gbcLP.gridheight = 1; // Trả lại gridheight mặc định
         gbcLP.fill = GridBagConstraints.HORIZONTAL; // Trả lại fill mặc định
@@ -157,6 +166,7 @@ public class AddLPDialog extends JDialog {
         gbcImport.gridy = 0;
         gbcImport.insets = fieldMargin;
         importDateTextField = new JFormattedTextField();
+        importDateTextField.setText("2025-01-01");
         importDateTextField.setColumns(20);
         importInfoPanel.add(importDateTextField, gbcImport);
 
@@ -169,6 +179,7 @@ public class AddLPDialog extends JDialog {
         gbcImport.gridy = 0;
         gbcImport.insets = fieldMargin;
         quantityTextField = new JTextField(10);
+        quantityTextField.setText("1");
         importInfoPanel.add(quantityTextField, gbcImport);
 
         // Hàng 2: Kích thước - Trọng lượng
@@ -181,6 +192,7 @@ public class AddLPDialog extends JDialog {
         gbcImport.gridy = 1;
         gbcImport.insets = fieldMargin;
         dimensionsTextField = new JTextField(20);
+        dimensionsTextField.setText("31x31x0.3 cm");
         importInfoPanel.add(dimensionsTextField, gbcImport);
 
         gbcImport.gridx = 2;
@@ -192,6 +204,7 @@ public class AddLPDialog extends JDialog {
         gbcImport.gridy = 1;
         gbcImport.insets = fieldMargin;
         weightTextField = new JTextField(10);
+        weightTextField.setText("0.25");
         importInfoPanel.add(weightTextField, gbcImport);
 
         // Hàng 3: Giá bán - Giá nhập
@@ -204,6 +217,7 @@ public class AddLPDialog extends JDialog {
         gbcImport.gridy = 2;
         gbcImport.insets = fieldMargin;
         sellingPriceTextField = new JTextField(10);
+        sellingPriceTextField.setText("0.0");
         importInfoPanel.add(sellingPriceTextField, gbcImport);
 
         gbcImport.gridx = 2;
@@ -215,6 +229,7 @@ public class AddLPDialog extends JDialog {
         gbcImport.gridy = 2;
         gbcImport.insets = fieldMargin;
         importPriceTextField = new JTextField(10);
+        importPriceTextField.setText("0.0");
         importInfoPanel.add(importPriceTextField, gbcImport);
 
         gbc.gridx = 0;
@@ -228,6 +243,7 @@ public class AddLPDialog extends JDialog {
         JPanel descriptionPanel = new JPanel(new BorderLayout());
         descriptionPanel.setBorder(new TitledBorder("Mô tả"));
         descriptionTextArea = new JTextArea(5, 40);
+        descriptionTextArea.setText("");
         descriptionPanel.add(new JScrollPane(descriptionTextArea), BorderLayout.CENTER);
 
         gbc.gridx = 0;
@@ -299,11 +315,11 @@ public class AddLPDialog extends JDialog {
             // Gọi DAO để lưu vào database
             boolean success = LPDAO.getInstance().addLP(LP);
             if (success) {
-                JOptionPane.showMessageDialog(this, "Thêm sách thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Thêm LP thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 isSaveClicked = true;
                 dispose(); // Đóng dialog
             } else {
-                JOptionPane.showMessageDialog(this, "Lỗi khi lưu sách vào cơ sở dữ liệu.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Lỗi khi lưu LP vào cơ sở dữ liệu.", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập đúng định dạng số cho số trang, số lượng, giá và trọng lượng.", "Lỗi định dạng", JOptionPane.ERROR_MESSAGE);
@@ -314,3 +330,4 @@ public class AddLPDialog extends JDialog {
     }   
 
 }
+

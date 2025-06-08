@@ -60,20 +60,23 @@ public class AddCDDialog extends JDialog {
         gbcCD.insets = labelMargin;
         cdInfoPanel.add(new JLabel("Tiêu đề :"), gbcCD);
 
+        titleTextField = new JTextField(20);
+        titleTextField.setText("CD mới");
         gbcCD.gridx = 1;
         gbcCD.gridy = 0;
         gbcCD.insets = fieldMargin;
-        cdInfoPanel.add(titleTextField = new JTextField(20), gbcCD);
+        cdInfoPanel.add(titleTextField, gbcCD);
 
         gbcCD.gridx = 2;
         gbcCD.gridy = 0;
         gbcCD.insets = labelMargin;
         cdInfoPanel.add(new JLabel("Hãng thu :"), gbcCD);
 
+        recordLabelTextField = new JTextField(20);
+        recordLabelTextField.setText("Hãng thu mới");
         gbcCD.gridx = 3;
         gbcCD.gridy = 0;
         gbcCD.insets = fieldMargin;
-        recordLabelTextField = new JTextField(20);
         cdInfoPanel.add(recordLabelTextField, gbcCD);
 
         // Hàng 2: Nghệ sĩ - Thể loại
@@ -82,20 +85,23 @@ public class AddCDDialog extends JDialog {
         gbcCD.insets = labelMargin;
         cdInfoPanel.add(new JLabel("Nghệ sĩ :"), gbcCD);
 
+        artistTextField = new JTextField(20);
+        artistTextField.setText("Nghệ sĩ mới");
         gbcCD.gridx = 1;
         gbcCD.gridy = 1;
         gbcCD.insets = fieldMargin;
-        cdInfoPanel.add(artistTextField = new JTextField(20), gbcCD);
+        cdInfoPanel.add(artistTextField, gbcCD);
 
         gbcCD.gridx = 2;
         gbcCD.gridy = 1;
         gbcCD.insets = labelMargin;
         cdInfoPanel.add(new JLabel("Thể loại :"), gbcCD);
 
+        genreTextField = new JTextField(20);
+        genreTextField.setText("Pop");
         gbcCD.gridx = 3;
         gbcCD.gridy = 1;
         gbcCD.insets = fieldMargin;
-        genreTextField = new JTextField(20);
         cdInfoPanel.add(genreTextField, gbcCD);
 
         // Hàng 3: Ngày phát hành - Danh sách bài hát
@@ -105,12 +111,13 @@ public class AddCDDialog extends JDialog {
         gbcCD.anchor = GridBagConstraints.NORTHWEST; // Neo label lên trên
         cdInfoPanel.add(new JLabel("Ngày phát hành :"), gbcCD);
 
+        releaseDateTextField = new JFormattedTextField();
+        releaseDateTextField.setText("2025-01-01");
+        releaseDateTextField.setColumns(20);
         gbcCD.gridx = 1;
         gbcCD.gridy = 2;
         gbcCD.insets = fieldMargin;
         gbcCD.anchor = GridBagConstraints.NORTHWEST; // Neo textField lên trên
-        releaseDateTextField = new JFormattedTextField();
-        releaseDateTextField.setColumns(20);
         cdInfoPanel.add(releaseDateTextField, gbcCD);
         gbcCD.anchor = GridBagConstraints.WEST; // Trả lại anchor mặc định
 
@@ -120,13 +127,15 @@ public class AddCDDialog extends JDialog {
         gbcCD.anchor = GridBagConstraints.NORTHWEST; // Neo label lên trên
         cdInfoPanel.add(new JLabel("Danh sách bài hát :"), gbcCD);
 
+        trackListTextArea = new JTextArea(3, 20);
+        trackListTextArea.setText("Bài hát 1, Bài hát 2");
         gbcCD.gridx = 3;
         gbcCD.gridy = 2;
         gbcCD.gridwidth = GridBagConstraints.REMAINDER; // Chiếm toàn bộ không gian còn lại bên phải
         gbcCD.gridheight = 2; // Cho phép JTextArea có chiều cao 2 hàng (hoặc hơn nếu cần)
         gbcCD.insets = fieldMargin;
         gbcCD.fill = GridBagConstraints.BOTH; // Lấp đầy cả chiều ngang và dọc
-        cdInfoPanel.add(new JScrollPane(trackListTextArea = new JTextArea(3, 20)), gbcCD);
+        cdInfoPanel.add(new JScrollPane(trackListTextArea), gbcCD);
         gbcCD.gridwidth = 1; // Trả lại gridwidth mặc định
         gbcCD.gridheight = 1; // Trả lại gridheight mặc định
         gbcCD.fill = GridBagConstraints.HORIZONTAL; // Trả lại fill mặc định
@@ -154,11 +163,12 @@ public class AddCDDialog extends JDialog {
         gbcImport.insets = labelMargin;
         importInfoPanel.add(new JLabel("Ngày nhập :"), gbcImport);
 
+        importDateTextField = new JFormattedTextField();
+        importDateTextField.setText("2025-01-01");
+        importDateTextField.setColumns(20);
         gbcImport.gridx = 1;
         gbcImport.gridy = 0;
         gbcImport.insets = fieldMargin;
-        importDateTextField = new JFormattedTextField();
-        importDateTextField.setColumns(20);
         importInfoPanel.add(importDateTextField, gbcImport);
 
         gbcImport.gridx = 2;
@@ -166,10 +176,11 @@ public class AddCDDialog extends JDialog {
         gbcImport.insets = labelMargin;
         importInfoPanel.add(new JLabel("Số lượng :"), gbcImport);
 
+        quantityTextField = new JTextField(10);
+        quantityTextField.setText("1");
         gbcImport.gridx = 3;
         gbcImport.gridy = 0;
         gbcImport.insets = fieldMargin;
-        quantityTextField = new JTextField(10);
         importInfoPanel.add(quantityTextField, gbcImport);
 
         // Hàng 2: Kích thước - Trọng lượng
@@ -178,10 +189,11 @@ public class AddCDDialog extends JDialog {
         gbcImport.insets = labelMargin;
         importInfoPanel.add(new JLabel("Kích thước :"), gbcImport);
 
+        dimensionsTextField = new JTextField(20);
+        dimensionsTextField.setText("12x12x1 cm");
         gbcImport.gridx = 1;
         gbcImport.gridy = 1;
         gbcImport.insets = fieldMargin;
-        dimensionsTextField = new JTextField(20);
         importInfoPanel.add(dimensionsTextField, gbcImport);
 
         gbcImport.gridx = 2;
@@ -189,10 +201,11 @@ public class AddCDDialog extends JDialog {
         gbcImport.insets = labelMargin;
         importInfoPanel.add(new JLabel("Trọng lượng :"), gbcImport);
 
+        weightTextField = new JTextField(10);
+        weightTextField.setText("0.1");
         gbcImport.gridx = 3;
         gbcImport.gridy = 1;
         gbcImport.insets = fieldMargin;
-        weightTextField = new JTextField(10);
         importInfoPanel.add(weightTextField, gbcImport);
 
         // Hàng 3: Giá bán - Giá nhập
@@ -201,10 +214,11 @@ public class AddCDDialog extends JDialog {
         gbcImport.insets = labelMargin;
         importInfoPanel.add(new JLabel("Giá bán :"), gbcImport);
 
+        sellingPriceTextField = new JTextField(10);
+        sellingPriceTextField.setText("0.0");
         gbcImport.gridx = 1;
         gbcImport.gridy = 2;
         gbcImport.insets = fieldMargin;
-        sellingPriceTextField = new JTextField(10);
         importInfoPanel.add(sellingPriceTextField, gbcImport);
 
         gbcImport.gridx = 2;
@@ -212,10 +226,11 @@ public class AddCDDialog extends JDialog {
         gbcImport.insets = labelMargin;
         importInfoPanel.add(new JLabel("Giá nhập :"), gbcImport);
 
+        importPriceTextField = new JTextField(10);
+        importPriceTextField.setText("0.0");
         gbcImport.gridx = 3;
         gbcImport.gridy = 2;
         gbcImport.insets = fieldMargin;
-        importPriceTextField = new JTextField(10);
         importInfoPanel.add(importPriceTextField, gbcImport);
 
         gbc.gridx = 0;
@@ -229,6 +244,7 @@ public class AddCDDialog extends JDialog {
         JPanel descriptionPanel = new JPanel(new BorderLayout());
         descriptionPanel.setBorder(new TitledBorder("Mô tả"));
         descriptionTextArea = new JTextArea(5, 40);
+        descriptionTextArea.setText("");
         descriptionPanel.add(new JScrollPane(descriptionTextArea), BorderLayout.CENTER);
 
         gbc.gridx = 0;
@@ -297,10 +313,10 @@ public class AddCDDialog extends JDialog {
             CD cd = new CD(0, title, "CD", value, price, "0", description,
             quantity, weight, dimensions, warehouseEntryDate,artists, recordLabel, tracklist, genre, releaseDate);
 
-            // Gọi DAO để lưu vào database
+            // G���i DAO để lưu vào database
             boolean success = CDDAO.getInstance().addCD(cd);
             if (success) {
-                JOptionPane.showMessageDialog(this, "Thêm sách thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Thêm CD thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 isSaveClicked = true;
                 dispose(); // Đóng dialog
             } else {
@@ -315,3 +331,4 @@ public class AddCDDialog extends JDialog {
     }
 
 }
+

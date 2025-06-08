@@ -3,6 +3,7 @@ package GUI.Panel;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -15,8 +16,9 @@ import GUI.component.ButtonUI.*;
 import GUI.component.CustomTable.CustomTableCellRenderer;
 import GUI.dialog.addDialog.AddBookDialog;
 import Interface.ReloadablePanel;
+import GUI.Session;
 
-public class BookPanel extends JPanel implements ReloadablePanel{
+public class BookPanel extends JPanel implements ReloadablePanel {
     private JTable table;
     private DefaultTableModel tableModel;
     private JButton btnAdd;
@@ -74,14 +76,32 @@ public class BookPanel extends JPanel implements ReloadablePanel{
         table.setSelectionBackground(table.getBackground());
         table.setSelectionForeground(table.getForeground());
 
+        boolean canManage = Session.isAdminFlag || Session.isManagerFlag;
+        if (canManage) {
+            // Admin or Manager: show add button and edit/delete
+            btnAdd.setVisible(true);
+            actionColumn.setPreferredWidth(150);
+            table.getColumnModel().getColumn(5).setCellRenderer(new EditButtonRenderer());
+            table.getColumnModel().getColumn(5).setCellEditor(new EditButtonAction(table, this));
+        } else {
+            btnAdd.setVisible(false);
+            // render a Details button in action column
+            table.getColumnModel().getColumn(5).setCellRenderer((TableCellRenderer)(tbl, val, sel, focus, r, c) -> new JButton("Chi Tiết"));
+            // handle details click
+            table.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    int col = table.columnAtPoint(e.getPoint());
+                    int row = table.rowAtPoint(e.getPoint());
+                    if (col == 5 && row >= 0) {
+                        int modelRow = table.convertRowIndexToModel(row);
+                        int productId = (int) tableModel.getValueAt(modelRow, 0);
+                        Book book = bookDAO.getBookInfor(productId);
+                        new GUI.dialog.viewDialog.ViewBookDialog((Frame)SwingUtilities.getWindowAncestor(BookPanel.this), book).setVisible(true);
+                    }
+                }
+            });
+        }
 
-        // Đặt renderer cho cột cuối cùng (Hành động)
-        // Áp dụng EditButtonRenderer và EditButtonAction
-        table.getColumnModel().getColumn(5).setCellRenderer(new EditButtonRenderer());
-        table.getColumnModel().getColumn(5).setCellEditor(new EditButtonAction(table, this));
-
-
-        
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         for (int i = 0; i < table.getColumnCount() - 1; i++) {
@@ -105,8 +125,6 @@ public class BookPanel extends JPanel implements ReloadablePanel{
                 }
             }
         });
-        
-
     }
 
     public void loadBooks() {
@@ -118,7 +136,7 @@ public class BookPanel extends JPanel implements ReloadablePanel{
                     book.getPrice(), book.getQuantity(), ""
             });
         }
-        System.out.println("So luong book: " + books.size());
+        System.out.println("So luong Book: " + books.size());
     }
 
     @Override

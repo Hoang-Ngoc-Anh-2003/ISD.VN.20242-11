@@ -1,9 +1,9 @@
 package GUI.Panel;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.util.List;
 import DAO.*;
@@ -11,19 +11,21 @@ import Model.*;
 import GUI.component.ButtonAction.EditButtonAction;
 import GUI.component.ButtonUI.*;
 import GUI.component.CustomTable.CustomTableCellRenderer;
+import GUI.Session;
+import GUI.dialog.viewDialog.ViewDVDDialog;
 import GUI.dialog.addDialog.AddDVDDialog;
 import Interface.ReloadablePanel;
-
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
-public class DVDPanel extends JPanel implements ReloadablePanel{
+public class DVDPanel extends JPanel implements ReloadablePanel {
     private JTable table;
     private DefaultTableModel tableModel;
     private JButton btnAdd;
     private DVDDAO dvdDAO;
 
     public DVDPanel() {
+        boolean canManage = Session.isAdminFlag || Session.isManagerFlag;
         setLayout(new BorderLayout(10, 10));
         dvdDAO = new DVDDAO();
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -55,15 +57,12 @@ public class DVDPanel extends JPanel implements ReloadablePanel{
 
         // Cố định kích thước cột Hành động
         TableColumn actionColumn = table.getColumnModel().getColumn(5);
-        actionColumn.setPreferredWidth(150);
-        actionColumn.setMaxWidth(180);
-        actionColumn.setMinWidth(180);
 
         JScrollPane scrollPane = new JScrollPane(table);
         loadDVDs();
 
-        // Đặt renderer để giữ màu nguyên bản ngay cả khi chọn
-        for (int i = 0; i < table.getColumnCount(); i++) {
+        // Đặt renderer cho tất cả cột, trừ cột Hành động
+        for (int i = 0; i < table.getColumnCount() - 1; i++) {
             table.getColumnModel().getColumn(i).setCellRenderer(new CustomTableCellRenderer());
         }
 
@@ -71,49 +70,60 @@ public class DVDPanel extends JPanel implements ReloadablePanel{
         table.setSelectionBackground(table.getBackground());
         table.setSelectionForeground(table.getForeground());
 
-
-        // Đặt renderer cho cột cuối cùng (Hành động)
-        // Áp dụng EditButtonRenderer và EditButtonAction
-        table.getColumnModel().getColumn(5).setCellRenderer(new EditButtonRenderer());
-        table.getColumnModel().getColumn(5).setCellEditor(new EditButtonAction(table, this));
-
-
-        
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        for (int i = 0; i < table.getColumnCount() - 1; i++) {
-            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        if (canManage) {
+            btnAdd.setVisible(true);
+            actionColumn.setPreferredWidth(150);
+            actionColumn.setMaxWidth(180);
+            actionColumn.setMinWidth(180);
+            table.getColumnModel().getColumn(5).setCellRenderer(new EditButtonRenderer());
+            table.getColumnModel().getColumn(5).setCellEditor(new EditButtonAction(table, this));
+        } else {
+            btnAdd.setVisible(false);
+            // render Details button in action column
+            table.getColumnModel().getColumn(5).setCellRenderer((TableCellRenderer)(tbl,val,sel,focus,r,c) -> new JButton("Chi Tiết"));
+            // handle click on Details button
+            table.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    int col = table.columnAtPoint(e.getPoint());
+                    int row = table.rowAtPoint(e.getPoint());
+                    if (col == 5 && row >= 0) {
+                        int modelRow = table.convertRowIndexToModel(row);
+                        int productId = (int) tableModel.getValueAt(modelRow, 0);
+                        DVD dvd = dvdDAO.getDVDInfor(productId);
+                        new ViewDVDDialog((Frame) SwingUtilities.getWindowAncestor(DVDPanel.this), dvd).setVisible(true);
+                    }
+                }
+            });
         }
 
         add(headerPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
-
-         btnAdd.addActionListener(new ActionListener() {
+        // Action Listener for Add DVD button
+        btnAdd.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(DVDPanel.this);
-                AddDVDDialog addDVDDialog = new AddDVDDialog(parentFrame, "Thêm DVD", true); // Thêm title và modal
+                AddDVDDialog addDVDDialog = new AddDVDDialog(parentFrame, "Thêm DVD", true);
                 addDVDDialog.setVisible(true);
                 if (addDVDDialog.isSaveClicked()) {
-                loadDVDs();
+                    loadDVDs();
                 }
             }
         });
     }
 
-    public void loadDVDs() {
+    private void loadDVDs() {
         List<DVD> dvds = dvdDAO.getAllDVDs();
         tableModel.setRowCount(0);
         for (DVD dvd : dvds) {
-            tableModel.addRow(new Object[]{
-                dvd.getProductId(), dvd.getTitle(), dvd.getDirector(),
-                dvd.getPrice(), dvd.getQuantity(), ""
-            });
+            Object[] rowData = {dvd.getProductId(), dvd.getTitle(), dvd.getDirector(), dvd.getPrice(), dvd.getQuantity(), ""};
+            tableModel.addRow(rowData);
         }
+        System.out.println("So luong DVD: " + dvds.size());
     }
 
     @Override
     public void reloadData() {
-        loadDVDs(); // gọi method load hiện tại
+        loadDVDs();
     }
 }

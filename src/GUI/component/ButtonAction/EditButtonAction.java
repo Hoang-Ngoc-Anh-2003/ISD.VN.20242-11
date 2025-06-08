@@ -68,30 +68,29 @@ public class EditButtonAction extends AbstractCellEditor implements TableCellEdi
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = table.convertRowIndexToModel(row);
                 int productId = (int) table.getModel().getValueAt(selectedRow, 0);
-                String category = (String) table.getModel().getValueAt(selectedRow, 2);
+                String displayCategory = (String) table.getModel().getValueAt(selectedRow, 2);
+                // use DAO to get actual category key for logic
+                String category = ProductDAO.getInstance().getProductCategory(productId);
 
-                int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa sản phẩm ID " + productId + " thuộc loại " + category + "?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa sản phẩm ID " + productId + " thuộc loại " + displayCategory + "?", "Xác nhận", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
-                    // Gọi DAO tương ứng để xóa sản phẩm khỏi database
                     boolean deleted = false;
                     if (category.equalsIgnoreCase("book")) {
-                        // deleted = bookDAO.deleteBook(productId); // Cần triển khai
-                        JOptionPane.showMessageDialog(null, "Chức năng xóa sách chưa được triển khai cho database.");
+                        deleted = BookDAO.getInstance().deleteBook(productId);
                     } else if (category.equalsIgnoreCase("cd")) {
-                        // Xóa CD
-                        JOptionPane.showMessageDialog(null, "Chức năng xóa CD chưa được triển khai cho database.");
+                        deleted = CDDAO.getInstance().deleteCD(productId);
                     } else if (category.equalsIgnoreCase("dvd")) {
-                        // Xóa DVD
-                        JOptionPane.showMessageDialog(null, "Chức năng xóa DVD chưa được triển khai cho database.");
+                        deleted = DVDDAO.getInstance().deleteDVD(productId);
                     } else if (category.equalsIgnoreCase("lp")) {
-                        // Xóa LP
-                        JOptionPane.showMessageDialog(null, "Chức năng xóa LP chưa được triển khai cho database.");
+                        deleted = LPDAO.getInstance().deleteLP(productId);
                     }
 
                     if (deleted) {
                         ((DefaultTableModel) table.getModel()).removeRow(row);
                         JOptionPane.showMessageDialog(null, "Xóa thành công!");
+                        reloadablePanel.reloadData();
                     } else {
+                        System.err.println("[EditButtonAction] Delete failed for productId=" + productId + ", categoryKey=" + category + ", displayCategory=" + displayCategory);
                         JOptionPane.showMessageDialog(null, "Lỗi khi xóa.");
                     }
                 }

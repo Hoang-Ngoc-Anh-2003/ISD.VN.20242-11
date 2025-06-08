@@ -119,4 +119,20 @@ public abstract class Product {
     public void setWarehouseEntryDate(String warehouseEntryDate) {
         this.warehouseEntryDate = warehouseEntryDate;
     }
+
+    public String getSellingPrice() {
+        return String.valueOf(value);
+    }
+
+    public void setSellingPrice(String sellingPrice) {
+        this.value = Double.parseDouble(sellingPrice);
+    }
+
+    public String getImportPrice() {
+        return String.valueOf(price);
+    }
+
+    public void setImportPrice(String importPrice) {
+        this.price = Double.parseDouble(importPrice);
+    }
 }

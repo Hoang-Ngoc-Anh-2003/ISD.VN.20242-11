@@ -1,5 +1,6 @@
 package DAO;
 
+import Model.Book;
 import Model.Product;
 import java.sql.*;
 import java.util.ArrayList;

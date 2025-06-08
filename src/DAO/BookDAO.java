@@ -6,6 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BookDAO extends ProductDAO {
+    private static BookDAO instance;
+    public static BookDAO getInstance() {
+        if (instance == null) {
+            instance = new BookDAO();
+        }
+        return instance;
+    }
+
     // lay thong tin sach
     public Book getBookInfor (int product_id){
         Book book = null;
@@ -134,8 +142,21 @@ public class BookDAO extends ProductDAO {
             productStmt.setString(4, barcode);
             productStmt.setString(5, book.getDescription());
             productStmt.setInt(6, book.getQuantity());
-            productStmt.setString(7, book.getWeight());
+            // Parse weight as double for numeric column
+            double weightValue = 0.0;
+            try {
+                weightValue = Double.parseDouble(book.getWeight());
+            } catch (NumberFormatException e) {
+                System.out.println("[BookDAO] Invalid weight format: " + book.getWeight());
+                return false;
+            }
+            productStmt.setDouble(7, weightValue);
             productStmt.setString(8, book.getDimensions());
+            System.out.println("[BookDAO] warehouseEntryDate: " + book.getWarehouseEntryDate());
+            if (book.getWarehouseEntryDate() == null || book.getWarehouseEntryDate().isEmpty()) {
+                System.out.println("[BookDAO] warehouseEntryDate is null or empty!");
+                return false;
+            }
             productStmt.setDate(9, java.sql.Date.valueOf(book.getWarehouseEntryDate()));
 
     
@@ -149,6 +170,11 @@ public class BookDAO extends ProductDAO {
                 bookStmt.setString(2, book.getAuthors());
                 bookStmt.setString(3, book.getCoverType());
                 bookStmt.setString(4, book.getPublisher());
+                System.out.println("[BookDAO] publicationDate: " + book.getPublicationDate());
+                if (book.getPublicationDate() == null || book.getPublicationDate().isEmpty()) {
+                    System.out.println("[BookDAO] publicationDate is null or empty!");
+                    return false;
+                }
                 bookStmt.setDate(5, java.sql.Date.valueOf(book.getPublicationDate()));
                 bookStmt.setInt(6, book.getNumPages());
                 bookStmt.setString(7, book.getLanguage());
@@ -167,47 +193,45 @@ public class BookDAO extends ProductDAO {
 
     // Cập nhật sách
     public boolean updateBook(Book book) {
-        String updateProductSql = "UPDATE Products SET title = ?, value = ?, price = ?, barcode = ?, " +
-        "description = ?, quantity = ?, weight = ?, dimensions = ?, warehouse_entry_date = ? " +
-        "WHERE product_id = ?";
-
-        String updateBookSql = "UPDATE Books SET authors = ?, cover_type = ?, publisher = ?, " +
-        "publication_date = ?, num_pages = ?, language = ?, genre = ? WHERE book_id = ?";
-        
+        String productSQL = "UPDATE Products SET title=?, value=?, price=?, description=?, quantity=?, weight=?, dimensions=?, warehouse_entry_date=? WHERE product_id=?";
+        String bookSQL = "UPDATE Books SET authors=?, cover_type=?, publisher=?, publication_date=?, num_pages=?, language=?, genre=? WHERE book_id=?";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement productStmt = conn.prepareStatement(updateProductSql);
-             PreparedStatement bookStmt = conn.prepareStatement(updateBookSql)) {
-
-            // Cập nhật Products
+             PreparedStatement productStmt = conn.prepareStatement(productSQL);
+             PreparedStatement bookStmt = conn.prepareStatement(bookSQL)) {
+            // Update Products
             productStmt.setString(1, book.getTitle());
             productStmt.setDouble(2, book.getValue());
             productStmt.setDouble(3, book.getPrice());
-            productStmt.setString(4, book.getBarcode());
-            productStmt.setString(5, book.getDescription());
-            productStmt.setInt(6, book.getQuantity());
-            productStmt.setString(7, book.getWeight());
-            productStmt.setString(8, book.getDimensions());
-            productStmt.setDate(9, java.sql.Date.valueOf(book.getWarehouseEntryDate()));
-            productStmt.setInt(10, book.getProductId());
-            productStmt.executeUpdate();
-
-            // Cập nhật Books
+            productStmt.setString(4, book.getDescription());
+            productStmt.setInt(5, book.getQuantity());
+            // Parse weight as double for numeric column
+            double weightValue = 0.0;
+            try {
+                weightValue = Double.parseDouble(book.getWeight());
+            } catch (NumberFormatException e) {
+                System.out.println("[BookDAO] Invalid weight format: " + book.getWeight());
+                return false;
+            }
+            productStmt.setDouble(6, weightValue);
+            productStmt.setString(7, book.getDimensions());
+            productStmt.setDate(8, java.sql.Date.valueOf(book.getWarehouseEntryDate()));
+            productStmt.setInt(9, book.getProductId());
+            int productRows = productStmt.executeUpdate();
+            // Update Books
             bookStmt.setString(1, book.getAuthors());
             bookStmt.setString(2, book.getCoverType());
             bookStmt.setString(3, book.getPublisher());
+            // Sửa lỗi: publication_date phải là java.sql.Date
             bookStmt.setDate(4, java.sql.Date.valueOf(book.getPublicationDate()));
             bookStmt.setInt(5, book.getNumPages());
             bookStmt.setString(6, book.getLanguage());
             bookStmt.setString(7, book.getGenre());
             bookStmt.setInt(8, book.getProductId());
-            bookStmt.executeUpdate();
-
-            return true;
-            
+            int bookRows = bookStmt.executeUpdate();
+            return productRows > 0 && bookRows > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
-            
         }
     }
 
@@ -240,40 +264,50 @@ public class BookDAO extends ProductDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            System.out.println("[BookDAO] getBookCount SQL error: " + e.getMessage());
         }
         return count;
     }
 
-    private Book mapResultSetToBook(ResultSet rs) throws SQLException {
-        return new Book(
-            rs.getInt("product_id"),
-            rs.getString("title"),
-            rs.getString("category"),
-            rs.getDouble("value"),
-            rs.getDouble("price"),
-            rs.getString("barcode"),
-            rs.getString("description"),
-            rs.getInt("quantity"),
-            rs.getString("weight"),
-            rs.getString("dimensions"),
-            rs.getString("warehouse_entry_date"),
-            rs.getString("authors"),
-            rs.getString("cover_type"),
-            rs.getString("publisher"),
-            rs.getString("publication_date"),
-            rs.getInt("num_pages"),
-            rs.getString("language"),
-            rs.getString("genre")
-        );
-    }
-
-    private static BookDAO instance;
-
-    public static BookDAO getInstance() {
-        if (instance == null) {
-            instance = new BookDAO();
+    // Xóa Book trước, sau đó xóa Product
+    public boolean deleteBook(int productId) {
+        String sqlBook = "DELETE FROM Books WHERE book_id = ?";
+        String sqlProduct = "DELETE FROM Products WHERE product_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtBook = conn.prepareStatement(sqlBook);
+             PreparedStatement stmtProduct = conn.prepareStatement(sqlProduct)) {
+            stmtBook.setInt(1, productId);
+            int bookRows = stmtBook.executeUpdate();
+            stmtProduct.setInt(1, productId);
+            int productRows = stmtProduct.executeUpdate();
+            return bookRows > 0 && productRows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
-        return instance;
     }
 
+    // Helper method to map ResultSet to Book object
+    private Book mapResultSetToBook(ResultSet rs) throws SQLException {
+        Book book = new Book();
+        book.setProductId(rs.getInt("product_id"));
+        book.setTitle(rs.getString("title"));
+        book.setCategory(rs.getString("category"));
+        book.setValue(rs.getDouble("value"));
+        book.setPrice(rs.getDouble("price"));
+        book.setBarcode(rs.getString("barcode"));
+        book.setDescription(rs.getString("description"));
+        book.setQuantity(rs.getInt("quantity"));
+        book.setWeight(rs.getString("weight"));
+        book.setDimensions(rs.getString("dimensions"));
+        book.setWarehouseEntryDate(rs.getString("warehouse_entry_date"));
+        book.setAuthors(rs.getString("authors"));
+        book.setCoverType(rs.getString("cover_type"));
+        book.setPublisher(rs.getString("publisher"));
+        book.setPublicationDate(rs.getString("publication_date"));
+        book.setNumPages(rs.getInt("num_pages"));
+        book.setLanguage(rs.getString("language"));
+        book.setGenre(rs.getString("genre"));
+        return book;
+    }
 }

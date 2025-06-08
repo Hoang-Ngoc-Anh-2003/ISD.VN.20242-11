@@ -6,6 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CDDAO extends ProductDAO {
+    public static CDDAO instance;
+    public static CDDAO getInstance() {
+        if (instance == null) {
+            instance = new CDDAO();
+        }
+        return instance;
+    }
+
     // lay thong tin CD
     public CD getCDInfor (int product_id){
         CD cd = null;
@@ -127,7 +135,15 @@ public class CDDAO extends ProductDAO {
             productStmt.setString(4, barcode);
             productStmt.setString(5, cd.getDescription());
             productStmt.setInt(6, cd.getQuantity());
-            productStmt.setString(7, cd.getWeight());
+            // Parse weight as double for numeric column
+            double weightValue = 0.0;
+            try {
+                weightValue = Double.parseDouble(cd.getWeight());
+            } catch (NumberFormatException e) {
+                System.out.println("[CDDAO] Invalid weight format: " + cd.getWeight());
+                return false;
+            }
+            productStmt.setDouble(7, weightValue);
             productStmt.setString(8, cd.getDimensions());
             productStmt.setDate(9, java.sql.Date.valueOf(cd.getWarehouseEntryDate()));
     
@@ -172,7 +188,15 @@ public class CDDAO extends ProductDAO {
             productStmt.setString(4, cd.getBarcode());
             productStmt.setString(5, cd.getDescription());
             productStmt.setInt(6, cd.getQuantity());
-            productStmt.setString(7, cd.getWeight());
+            // Parse weight as double for numeric column
+            double weightValue = 0.0;
+            try {
+                weightValue = Double.parseDouble(cd.getWeight());
+            } catch (NumberFormatException e) {
+                System.out.println("[CDDAO] Invalid weight format: " + cd.getWeight());
+                return false;
+            }
+            productStmt.setDouble(7, weightValue);
             productStmt.setString(8, cd.getDimensions());
             productStmt.setDate(9, java.sql.Date.valueOf(cd.getWarehouseEntryDate()));
             productStmt.setInt(10, cd.getProductId());
@@ -195,43 +219,20 @@ public class CDDAO extends ProductDAO {
         }
     }
 
-
     public CD getCDById(int productId) {
         String sql = "SELECT * FROM Products JOIN CDs ON Products.product_id = CDs.product_id WHERE Products.product_id = ?";
-        
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
-    
             stmt.setInt(1, productId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToCD(rs);
-                }
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return mapResultSetToCD(rs);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
-
-    // so luong CD
-    public static int getCDCount() {
-        int count = 0;
-        String sql = "SELECT COUNT(*) FROM CDs";
-    
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-    
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return count;
-    }
-    
 
     private CD mapResultSetToCD(ResultSet rs) throws SQLException {
         return new CD(
@@ -243,7 +244,7 @@ public class CDDAO extends ProductDAO {
             rs.getString("barcode"),
             rs.getString("description"),
             rs.getInt("quantity"),
-            rs.getString("weight"),
+            String.valueOf(rs.getDouble("weight")),
             rs.getString("dimensions"),
             rs.getString("warehouse_entry_date"),
             rs.getString("artists"),
@@ -254,13 +255,28 @@ public class CDDAO extends ProductDAO {
         );
     }
 
-    private static CDDAO instance;
-
-    public static CDDAO getInstance() {
-        if (instance == null) {
-            instance = new CDDAO();
+    // Xóa CD trước, sau đó xóa Product
+    public boolean deleteCD(int productId) {
+        System.out.println("[CDDAO] deleteCD called for productId=" + productId);
+        String sqlCD = "DELETE FROM CDs WHERE cd_id = ?";
+        String sqlProduct = "DELETE FROM Products WHERE product_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmtCD = conn.prepareStatement(sqlCD);
+             PreparedStatement stmtProduct = conn.prepareStatement(sqlProduct)) {
+            stmtCD.setInt(1, productId);
+            int cdRows = stmtCD.executeUpdate();
+            stmtProduct.setInt(1, productId);
+            int productRows = stmtProduct.executeUpdate();
+            // log success or failure
+            if (cdRows > 0 && productRows > 0) {
+                System.out.println("[CDDAO] Delete successful: cdRows=" + cdRows + ", productRows=" + productRows + ", productId=" + productId);
+            } else {
+                System.out.println("[CDDAO] Delete failed: cdRows=" + cdRows + ", productRows=" + productRows + ", productId=" + productId);
+            }
+            return cdRows > 0 && productRows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
-        return instance;
     }
-
 }

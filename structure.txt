@@ -2,6 +2,7 @@
 ├── Activity diagrams
 │   ├── Activity Diagram - Add Product
 │   ├── Activity Diagram - Update Product
+│   ├── Activity Diagram - Manage User
 │   ├── Activity Diagram - View Product Detail
 │   ├── Activity Diagram - Place Order
 │   ├── Activity Diagram - Place Rush Order
@@ -11,6 +12,7 @@
 ├── Architectural Design
 │   ├── Analysis Diagram
 │   │   ├── Analysis Diagram - Add_Update Product
+│   │   ├── Analysis Diagram - Manage User
 │   │   ├── Analysis Diagram - View Product Detail
 │   │   ├── Analysis Diagram - Place Order
 │   │   ├── Analysis Diagram - Place Rush Order
@@ -21,6 +23,7 @@
 │   ├── Communication Diagram
 │   │   ├── Communication Diagram - Add Product
 │   │   ├── Communication Diagram - Update Product
+│   │   ├── Communication Diagram - Manage User
 │   │   ├── Communication Diagram - View Product Detail
 │   │   ├── Communication Diagram - Place Order
 │   │   ├── Communication Diagram - Place Rush Order
@@ -29,6 +32,7 @@
 │   └── Sequence Diagram
 │       ├── Sequence Diagram - Add Product
 │       ├── Sequence Diagram - Update Product
+│       ├── Sequence Diagram - Manage User
 │       ├── Sequence Diagram - View Product Detail
 │       ├── Sequence Diagram - Place Order
 │       ├── Sequence Diagram - Place Rush Order
@@ -36,6 +40,7 @@
 │
 ├── Detailed Design
 │   ├── Class Diagram - Add_Update Product
+│   ├── Class Diagram - Manage User
 │   ├── Class Diagram - View Product Detail
 │   ├── Class Diagram - Place Order
 │   ├── Class Diagram - Place Rush Order

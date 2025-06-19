@@ -10,10 +10,10 @@
       + Review usecase: Place Order
       + Requirement: Introduction & Functionality
   - Đỗ Doãn Vinh 20225953:
-      + Usecase: View Product Detail
+      + Usecase: View Product Detail & Manage User
       + Review usecase:Place Rush Order & Pay Order
       + Requirement: Reliability & Performance & Supportability
   - Hoàng Ngọc Ánh 20214992:
       + Usecase: Add & Update Product
-      + Review usecase: View Product Detail
+      + Review usecase: View Product Detail & Manage User
       + Requirement: Business process

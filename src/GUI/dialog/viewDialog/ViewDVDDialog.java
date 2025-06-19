@@ -5,7 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class ViewDVDDialog extends JDialog {
-    private DVD dvd;
+    private final DVD dvd;
 
     public ViewDVDDialog(Frame owner, DVD dvd) {
         super(owner, "DVD Details", true);

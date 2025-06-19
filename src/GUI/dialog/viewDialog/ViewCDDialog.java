@@ -5,7 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class ViewCDDialog extends JDialog {
-    private CD cd;
+    private final CD cd;
 
     public ViewCDDialog(Frame owner, CD cd) {
         super(owner, "CD Details", true);

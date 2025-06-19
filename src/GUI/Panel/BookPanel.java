@@ -9,7 +9,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-import DAO.BookDAO;
+import Controller.BookController;
 import Model.Book;
 import GUI.component.ButtonAction.EditButtonAction;
 import GUI.component.ButtonUI.*;
@@ -18,15 +18,24 @@ import GUI.dialog.addDialog.AddBookDialog;
 import Interface.ReloadablePanel;
 import GUI.Session;
 
+/**
+ * Panel hiển thị danh sách và quản lý sách
+ */
 public class BookPanel extends JPanel implements ReloadablePanel {
     private JTable table;
     private DefaultTableModel tableModel;
     private JButton btnAdd;
-    private BookDAO bookDAO;
+    private BookController bookController; // Thay đổi từ BookDAO sang BookController
 
+    /**
+     * Khởi tạo BookPanel
+     */
     public BookPanel() {
         setLayout(new BorderLayout(10, 10));
-        bookDAO = new BookDAO();
+
+        // Sử dụng BookController thay vì BookDAO
+        bookController = new BookController();
+
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Header chứa nút "Thêm Sách"
@@ -78,16 +87,16 @@ public class BookPanel extends JPanel implements ReloadablePanel {
 
         boolean canManage = Session.isAdminFlag || Session.isManagerFlag;
         if (canManage) {
-            // Admin or Manager: show add button and edit/delete
+            // Admin hoặc Manager: hiển thị nút thêm và sửa/xóa
             btnAdd.setVisible(true);
             actionColumn.setPreferredWidth(150);
             table.getColumnModel().getColumn(5).setCellRenderer(new EditButtonRenderer());
             table.getColumnModel().getColumn(5).setCellEditor(new EditButtonAction(table, this));
         } else {
             btnAdd.setVisible(false);
-            // render a Details button in action column
+            // Hiển thị nút Chi tiết trong cột Hành động
             table.getColumnModel().getColumn(5).setCellRenderer((TableCellRenderer)(tbl, val, sel, focus, r, c) -> new JButton("Chi Tiết"));
-            // handle details click
+            // Xử lý sự kiện khi nhấp vào nút Chi tiết
             table.addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     int col = table.columnAtPoint(e.getPoint());
@@ -95,7 +104,7 @@ public class BookPanel extends JPanel implements ReloadablePanel {
                     if (col == 5 && row >= 0) {
                         int modelRow = table.convertRowIndexToModel(row);
                         int productId = (int) tableModel.getValueAt(modelRow, 0);
-                        Book book = bookDAO.getBookInfor(productId);
+                        Book book = bookController.getBookInfo(productId);
                         new GUI.dialog.viewDialog.ViewBookDialog((Frame)SwingUtilities.getWindowAncestor(BookPanel.this), book).setVisible(true);
                     }
                 }
@@ -116,19 +125,22 @@ public class BookPanel extends JPanel implements ReloadablePanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(BookPanel.this);
-                AddBookDialog addBookDialog = new AddBookDialog(parentFrame, "Thêm Sách", true); // Thêm title và modal
+                AddBookDialog addBookDialog = new AddBookDialog(parentFrame, "Thêm Sách", true);
                 addBookDialog.setVisible(true);
 
-                // Tải lại dữ liệu sau khi thêm sách (nếu dialog được đóng và có thể đã thêm sách)
-                if (addBookDialog.isSaveClicked()) { // Kiểm tra nếu nút "Lưu" đã được nhấn (nếu bạn đã thêm logic này vào AddBookDialog)
+                // Tải lại dữ liệu sau khi thêm sách
+                if (addBookDialog.isSaveClicked()) {
                     loadBooks();
                 }
             }
         });
     }
 
+    /**
+     * Tải danh sách sách từ cơ sở dữ liệu và hiển thị lên bảng
+     */
     public void loadBooks() {
-        List<Book> books = bookDAO.getAllBooks();
+        List<Book> books = bookController.getAllBooks();
         tableModel.setRowCount(0);
         for (Book book : books) {
             tableModel.addRow(new Object[]{
@@ -136,11 +148,14 @@ public class BookPanel extends JPanel implements ReloadablePanel {
                     book.getPrice(), book.getQuantity(), ""
             });
         }
-        System.out.println("So luong Book: " + books.size());
+        System.out.println("Số lượng sách: " + books.size());
     }
 
+    /**
+     * Tải lại dữ liệu sách khi có thay đổi
+     */
     @Override
     public void reloadData() {
-        loadBooks(); // gọi method load hiện tại
+        loadBooks();
     }
 }

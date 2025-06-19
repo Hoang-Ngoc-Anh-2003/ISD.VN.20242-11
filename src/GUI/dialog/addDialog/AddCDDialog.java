@@ -3,34 +3,30 @@ package GUI.dialog.addDialog;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import GUI.component.ButtonUI.*;
 import Model.*;
-import DAO.*;
+import Controller.CDController;
 
 import javax.swing.border.TitledBorder;
 
 public class AddCDDialog extends JDialog {
 
-    private JTextField titleTextField;
-    private JTextField artistTextField;
-    private JTextField recordLabelTextField;
-    private JTextField genreTextField;
-    private JFormattedTextField releaseDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
-    private JTextArea trackListTextArea;
-    private JFormattedTextField importDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
-    private JTextField quantityTextField;
-    private JTextField dimensionsTextField;
-    private JTextField weightTextField;
-    private JTextField sellingPriceTextField;
-    private JTextField importPriceTextField;
-    private JTextArea descriptionTextArea;
-    private JButton cancelButton;
-    private JButton saveButton;
-    private boolean isSaveClicked = false;
-    private final Insets labelMargin = new Insets(10, 10, 10, 15);
-    private final Insets fieldMargin = new Insets(10, 0, 10, 15);
+    private final JTextField titleTextField;
+    private final JTextField artistTextField;
+    private final JTextField recordLabelTextField;
+    private final JTextField genreTextField;
+    private final JFormattedTextField releaseDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
+    private final JTextArea trackListTextArea;
+    private final JFormattedTextField importDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
+    private final JTextField quantityTextField;
+    private final JTextField dimensionsTextField;
+    private final JTextField weightTextField;
+    private final JTextField sellingPriceTextField;
+    private final JTextField importPriceTextField;
+    private final JTextArea descriptionTextArea;
+    private static final Insets labelMargin = new Insets(10, 10, 10, 15);
+    private static final Insets fieldMargin = new Insets(10, 0, 10, 15);
+	private boolean isSaveClicked = false;
 
     public AddCDDialog(JFrame parent, String title, boolean modal) {
         super(parent, title, modal);
@@ -258,26 +254,43 @@ public class AddCDDialog extends JDialog {
         // Buttons Panel ở phía dưới
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBorder(new EmptyBorder(10, 20, 20, 20));
-        cancelButton = new RoundedButton("Hủy", 10, new Color(255, 77, 77), new Color(204, 0, 0), new Color(204, 0, 0));
-        saveButton = new RoundedButton("Lưu", 10, new Color(0, 155, 229), new Color(0, 104, 190), new Color(0, 104, 190));
+	    JButton cancelButton = new RoundedButton("Hủy", 10, new Color(255, 77, 77), new Color(204, 0, 0), new Color(204, 0, 0));
+	    JButton saveButton = new RoundedButton("Lưu", 10, new Color(0, 155, 229), new Color(0, 104, 190), new Color(0, 104, 190));
         buttonPanel.add(cancelButton);
         buttonPanel.add(saveButton);
         add(buttonPanel, BorderLayout.SOUTH); 
 
-        // Action Listeners cho nút Lưu và Hủy
-        saveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                saveCD();
+        // --- Action Listeners cho nút Lưu và Hủy ---
+        saveButton.addActionListener(e -> {
+            try {
+                CDFormData data = getCDFormData();
+                // Kiểm tra dữ liệu bắt buộc
+                if (data.title.isEmpty() || data.artists.isEmpty() || data.warehouseEntryDate.isEmpty()) {
+                    JOptionPane.showMessageDialog(AddCDDialog.this, "Vui lòng điền đầy đủ các trường bắt buộc.", "Thiếu thông tin", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                CD cd = new CD(0, data.title, "CD", data.value, data.price, "0", data.description,
+                        data.quantity, data.weight, data.dimensions, data.warehouseEntryDate, data.artists, data.recordLabel, data.tracklist, data.genre, data.releaseDate);
+                CDController cdController = new CDController();
+                boolean success = cdController.addCD(cd);
+                if (success) {
+                    JOptionPane.showMessageDialog(AddCDDialog.this, "Thêm CD thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                    isSaveClicked = true;
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(AddCDDialog.this, "Lỗi khi lưu CD vào cơ sở dữ liệu.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(AddCDDialog.this, "Vui lòng nhập đúng định dạng số cho số lượng, giá.", "Lỗi định dạng", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(AddCDDialog.this, "Đã xảy ra lỗi: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                isSaveClicked = false;
-                dispose();
-            }
+        cancelButton.addActionListener(e -> {
+            isSaveClicked = false;
+            dispose();
         });
 
         pack();
@@ -285,50 +298,44 @@ public class AddCDDialog extends JDialog {
     }
 
     public boolean isSaveClicked() { return isSaveClicked; }
-    private void saveCD() {
+
+    // Thêm class tiện ích bên trong AddCDDialog
+    private static class CDFormData {
+        String title, warehouseEntryDate, dimensions, weight, description, artists, recordLabel, tracklist, genre, releaseDate;
+        double value, price;
+        int quantity;
+    }
+    private double parseDoubleField(JTextField field) {
         try {
-            // Lấy dữ liệu từ form
-            String title = titleTextField.getText().trim();
-            String warehouseEntryDate = importDateTextField.getText().trim();  // Định dạng: yyyy-MM-dd
-            String dimensions = dimensionsTextField.getText().trim();
-            String weight = weightTextField.getText().trim();
-            String description = descriptionTextArea.getText().trim();
-            double value  = Double.parseDouble(sellingPriceTextField.getText().trim());
-            double price  = Double.parseDouble(importPriceTextField.getText().trim());
-            int quantity = Integer.parseInt(quantityTextField.getText().trim());
-
-            String artists = artistTextField.getText().trim();
-            String recordLabel = recordLabelTextField.getText().trim();
-            String tracklist = trackListTextArea.getText().trim();
-            String genre = genreTextField.getText();
-            String releaseDate = releaseDateTextField.getText().trim(); // Định dạng: yyyy-MM-dd
-
-            // Kiểm tra dữ liệu bắt buộc
-            if (title.isEmpty() || title.isEmpty() || artists.isEmpty() || warehouseEntryDate.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Vui lòng điền đầy đủ các trường bắt buộc.", "Thiếu thông tin", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            // Tạo đối tượng CD
-            CD cd = new CD(0, title, "CD", value, price, "0", description,
-            quantity, weight, dimensions, warehouseEntryDate,artists, recordLabel, tracklist, genre, releaseDate);
-
-            // G���i DAO để lưu vào database
-            boolean success = CDDAO.getInstance().addCD(cd);
-            if (success) {
-                JOptionPane.showMessageDialog(this, "Thêm CD thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-                isSaveClicked = true;
-                dispose(); // Đóng dialog
-            } else {
-                JOptionPane.showMessageDialog(this, "Lỗi khi lưu sách vào cơ sở dữ liệu.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            }
+            return Double.parseDouble(field.getText().trim());
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập đúng định dạng số cho số trang, số lượng, giá và trọng lượng.", "Lỗi định dạng", JOptionPane.ERROR_MESSAGE);
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Đã xảy ra lỗi: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return 0.0;
         }
     }
 
-}
+    private int parseIntField(JTextField field) {
+        try {
+            return Integer.parseInt(field.getText().trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
 
+    private CDFormData getCDFormData() {
+        CDFormData data = new CDFormData();
+        data.title = titleTextField.getText().trim();
+        data.warehouseEntryDate = importDateTextField.getText().trim();
+        data.dimensions = dimensionsTextField.getText().trim();
+        data.weight = weightTextField.getText().trim();
+        data.description = descriptionTextArea.getText().trim();
+        data.value = parseDoubleField(sellingPriceTextField);
+        data.price = parseDoubleField(importPriceTextField);
+        data.quantity = parseIntField(quantityTextField);
+        data.artists = artistTextField.getText().trim();
+        data.recordLabel = recordLabelTextField.getText().trim();
+        data.tracklist = trackListTextArea.getText().trim();
+        data.genre = genreTextField.getText();
+        data.releaseDate = releaseDateTextField.getText().trim();
+        return data;
+    }
+}

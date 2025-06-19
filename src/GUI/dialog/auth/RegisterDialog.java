@@ -1,6 +1,6 @@
 package GUI.dialog.auth;
 
-import DAO.UserDAO;
+import Controller.UserController;
 import Model.User;
 
 import javax.swing.*;
@@ -93,26 +93,31 @@ public class RegisterDialog extends JDialog {
                         "Passwords do not match", "Register", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                UserDAO userDAO = new UserDAO();
+                UserController userController = new UserController();
                 // Check for duplicate username
-                if (userDAO.usernameExists(username)) {
+                if (userController.isUsernameExists(username)) {
                     JOptionPane.showMessageDialog(RegisterDialog.this,
                         "Username already exists", "Register", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
                 User user = new User(0, username, password, email, phone, "customer");
-                boolean success = userDAO.registerUser(user);
-                if (success) {
+                if (userController.registerUser(user)) {
                     JOptionPane.showMessageDialog(RegisterDialog.this,
-                        "Registration successful!", "Register", JOptionPane.INFORMATION_MESSAGE);
+                        "You have successfully registered.",
+                        "Register",
+                        JOptionPane.INFORMATION_MESSAGE);
                     succeeded = true;
                     dispose();
                 } else {
                     JOptionPane.showMessageDialog(RegisterDialog.this,
-                        "Error registering user. Please try again.", "Register", JOptionPane.ERROR_MESSAGE);
+                        "Failed to register",
+                        "Register",
+                        JOptionPane.ERROR_MESSAGE);
+                    succeeded = false;
                 }
             }
         });
+
         btnCancel.addActionListener(e -> dispose());
     }
 

@@ -7,11 +7,16 @@ import javax.swing.table.TableCellEditor;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import Controller.LPController;
 import GUI.component.ButtonUI.*;
 import GUI.dialog.editDialog.*;
 import Interface.ReloadablePanel;
 import Model.*;
-import DAO.*;
+import Controller.BookController;
+import Controller.CDController;
+import Controller.DVDController;
+import Controller.ProductController;
 // xử lý sự kiện button update/deletedelete
 public class EditButtonAction extends AbstractCellEditor implements TableCellEditor {
     private JPanel panel;
@@ -29,30 +34,34 @@ public class EditButtonAction extends AbstractCellEditor implements TableCellEdi
                 fireEditingStopped();
                 int selectedRow = table.convertRowIndexToModel(row);
                 int productId = (int) table.getModel().getValueAt(selectedRow, 0);
-                String category = ProductDAO.getInstance().getProductCategory(productId);
                 JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(table);
 
-                switch (category) {
-                    case "book":
-                        Book book = BookDAO.getInstance().getBookInfor(productId);
+                String category = ProductController.getProductCategory(productId);
+                switch (category != null ? category.toUpperCase() : "") {
+                    case "BOOK":
+                        BookController bookController = new BookController();
+                        Book book = bookController.getBookInfo(productId);
                         EditBookDialog editBookDialog = new EditBookDialog(parentFrame, "Book Edit", true, book);
                         editBookDialog.setVisible(true);
-                        if (editBookDialog.isSaveClicked()) { // Kiểm tra nếu nút "Lưu" đã được nhấn (nếu bạn đã thêm logic này vào AddBookDialog)
-                        reloadablePanel.reloadData();
+                        if (editBookDialog.isSaveClicked()) {
+                            reloadablePanel.reloadData();
                         }
                         break;
-                    case "CD" :
-                        CD cd = CDDAO.getInstance().getCDInfor(productId);
+                    case "CD":
+                        CDController cdController = new CDController();
+                        CD cd = cdController.getCDInfo(productId);
                         EditCDDialog editCDDialog = new EditCDDialog(parentFrame, "CD Edit", true, cd);
                         editCDDialog.setVisible(true);
                         break;
                     case "DVD":
-                        DVD dvd = DVDDAO.getInstance().getDVDInfor(productId);
+                        DVDController dvdController = new DVDController();
+                        DVD dvd = dvdController.getDVDInfo(productId);
                         EditDVDDialog editDVDDialog = new EditDVDDialog(parentFrame, "DVD Edit", true, dvd);
                         editDVDDialog.setVisible(true);
                         break;
-                    case "LP" :
-                        LP lp = LPDAO.getInstance().getLPInfor(productId);
+                    case "LP":
+                        LPController lpController = new LPController();
+                        LP lp = lpController.getLPInfo(productId);
                         EditLPDialog editLPDialog = new EditLPDialog(parentFrame, "LP Edit", true, lp);
                         editLPDialog.setVisible(true);
                         break;
@@ -70,21 +79,17 @@ public class EditButtonAction extends AbstractCellEditor implements TableCellEdi
                 int productId = (int) table.getModel().getValueAt(selectedRow, 0);
                 String displayCategory = (String) table.getModel().getValueAt(selectedRow, 2);
                 // use DAO to get actual category key for logic
-                String category = ProductDAO.getInstance().getProductCategory(productId);
+                String category = ProductController.getProductCategory(productId);
 
                 int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa sản phẩm ID " + productId + " thuộc loại " + displayCategory + "?", "Xác nhận", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
-                    boolean deleted = false;
-                    if (category.equalsIgnoreCase("book")) {
-                        deleted = BookDAO.getInstance().deleteBook(productId);
-                    } else if (category.equalsIgnoreCase("cd")) {
-                        deleted = CDDAO.getInstance().deleteCD(productId);
-                    } else if (category.equalsIgnoreCase("dvd")) {
-                        deleted = DVDDAO.getInstance().deleteDVD(productId);
-                    } else if (category.equalsIgnoreCase("lp")) {
-                        deleted = LPDAO.getInstance().deleteLP(productId);
-                    }
-
+                    boolean deleted = switch (category.toLowerCase()) {
+                        case "book" -> new BookController().deleteBook(productId);
+                        case "cd" -> new CDController().deleteCD(productId);
+                        case "dvd" -> new DVDController().deleteDVD(productId);
+                        case "lp" -> new LPController().deleteLP(productId);
+                        default -> false;
+                    };
                     if (deleted) {
                         ((DefaultTableModel) table.getModel()).removeRow(row);
                         JOptionPane.showMessageDialog(null, "Xóa thành công!");

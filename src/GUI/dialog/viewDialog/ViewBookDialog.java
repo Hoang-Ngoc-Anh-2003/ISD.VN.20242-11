@@ -5,7 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class ViewBookDialog extends JDialog {
-    private Book book;
+    private final Book book;
 
     public ViewBookDialog(Frame owner, Book book) {
         super(owner, "Book Details", true);

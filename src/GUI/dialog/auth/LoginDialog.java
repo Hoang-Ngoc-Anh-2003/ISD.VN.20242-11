@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import DAO.UserDAO;
+import Controller.UserController;
 import GUI.Session;
 import Model.User;
 import GUI.dialog.auth.RegisterDialog;
@@ -54,13 +54,13 @@ public class LoginDialog extends JDialog {
         setResizable(false);
         setLocationRelativeTo(parent);
 
-        UserDAO userDAO = new UserDAO();
+        UserController userController = new UserController();
 
         btnLogin.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String username = tfUsername.getText().trim();
                 String password = new String(pfPassword.getPassword());
-                User user = userDAO.getUserByUsername(username);
+                User user = userController.getUserByUsername(username);
                 if (user == null) {
                     JOptionPane.showMessageDialog(LoginDialog.this,
                             "Invalid username or password",
@@ -69,7 +69,7 @@ public class LoginDialog extends JDialog {
                     tfUsername.setText("");
                     pfPassword.setText("");
                     succeeded = false;
-                } else if (user.isBlocked()) {
+                } else if (userController.isUserBlocked(username)) {
                     JOptionPane.showMessageDialog(LoginDialog.this,
                             "Tài khoản đã bị chặn",
                             "Login",
@@ -77,7 +77,7 @@ public class LoginDialog extends JDialog {
                     tfUsername.setText("");
                     pfPassword.setText("");
                     succeeded = false;
-                } else if (userDAO.validateUser(username, password)) {
+                } else if (userController.validateUser(username, password)) {
                     // handle multiple roles: prompt if more than one
                     List<String> roles = user.getRoles();
                     String chosenRole;

@@ -1,33 +1,66 @@
 package Controller;
 
-import Model.Product;
-import DAO.ProductDAO;
-import java.util.List;
+import Model.DatabaseConnector;
+import java.sql.*;
 
-public class ProductController {
-    private ProductDAO productDAO;
+/**
+ * Controller quản lý các thao tác liên quan đến sản phẩm
+ */
+public abstract class ProductController {
 
-    public ProductController() {
-        productDAO = new ProductDAO();
+    /**
+     * Lấy thông tin loại sản phẩm (book, cd, dvd, lp) theo ID
+     *
+     * @param productId ID của sản phẩm cần truy vấn
+     * @return Loại sản phẩm (category)
+     */
+    public static String getProductCategory(int productId) {
+        String category = null;
+        String sql = "SELECT category FROM Products WHERE product_id = ?";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, productId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                category = rs.getString("category");
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi lấy loại sản phẩm: " + e.getMessage());
+        }
+
+        return category;
     }
+    
+    /**
+     * Đếm số lượng sản phẩm theo loại
+     *
+     * @param tableName Tên bảng cần đếm số lượng
+     * @return Số lượng sản phẩm
+     */
+    public int countProducts(String tableName) {
+        int count = 0;
 
-    // public int insertProduct(Product product) {
-    //     return productDAO.insertProduct(product);
-    // }
+        // Validate tableName to prevent SQL injection
+        if (!tableName.matches("^[a-zA-Z_][a-zA-Z0-9_]*$") || tableName.equalsIgnoreCase("Products")) {
+            throw new IllegalArgumentException("Invalid or unsafe table name: " + tableName);
+        }
+        String query = "SELECT COUNT(*) FROM " + tableName;
+        // Suppress IDE warning: tableName is validated above
+        // noinspection SqlSourceToSinkFlow
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
 
-    // public boolean updateProduct(Product product) {
-    //     return productDAO.updateProduct(product);
-    // }
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi đếm số lượng sản phẩm: " + e.getMessage());
+        }
 
-    // public boolean deleteProduct(int productId) {
-    //     return productDAO.deleteProduct(productId);
-    // }
-
-    // public Product getProductById(int productId) {
-    //     return productDAO.getProductById(productId);
-    // }
-
-    public List<Product> getAllProducts() {
-        return productDAO.getAllProducts();
+        return count;
     }
 }

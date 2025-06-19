@@ -3,35 +3,29 @@ package GUI.dialog.editDialog;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import GUI.component.ButtonUI.*;
 import Model.*;
-import DAO.*;
+import Controller.CDController;
 import javax.swing.border.TitledBorder;
 
 public class EditCDDialog extends JDialog {
-    private JTextField titleTextField;
-    private JTextField artistTextField;
-    private JTextField recordLabelTextField;
-    private JTextField genreTextField;
-    private JFormattedTextField releaseDateTextField;
-    private JTextArea trackListTextArea;
-    private JFormattedTextField importDateTextField;
-    private JTextField quantityTextField;
-    private JTextField dimensionsTextField;
-    private JTextField weightTextField;
-    private JTextField sellingPriceTextField;
-    private JTextField importPriceTextField;
-    private JTextArea descriptionTextArea;
-    private JButton cancelButton;
-    private JButton saveButton;
-    private boolean isSaveClicked = false;
-    private CD cdToEdit;
-    private final Insets labelMargin = new Insets(10, 10, 10, 15);
-    private final Insets fieldMargin = new Insets(10, 0, 10, 15);
+    private final JTextField titleTextField;
+    private final JTextField artistTextField;
+    private final JTextField recordLabelTextField;
+    private final JTextField genreTextField;
+    private final JFormattedTextField releaseDateTextField;
+    private final JTextArea trackListTextArea;
+    private final JFormattedTextField importDateTextField;
+    private final JTextField quantityTextField;
+    private final JTextField dimensionsTextField;
+    private final JTextField weightTextField;
+    private final JTextField sellingPriceTextField;
+    private final JTextField importPriceTextField;
+    private final JTextArea descriptionTextArea;
+	private boolean isSaveClicked = false;
+    private final CD cdToEdit;
 
-    public EditCDDialog(JFrame parent, String title, boolean modal, CD cd) {
+	public EditCDDialog(JFrame parent, String title, boolean modal, CD cd) {
         super(parent, title, modal);
         this.cdToEdit = cd;
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -57,14 +51,16 @@ public class EditCDDialog extends JDialog {
         // Hàng 1: Tiêu đề - Hãng thu
         gbcCD.gridx = 0;
         gbcCD.gridy = 0;
-        gbcCD.insets = labelMargin;
+	    Insets labelMargin = new Insets(10, 10, 10, 15);
+	    gbcCD.insets = labelMargin;
         cdInfoPanel.add(new JLabel("Tiêu đề :"), gbcCD);
 
         titleTextField = new JTextField(20);
         titleTextField.setText(cdToEdit.getTitle());
         gbcCD.gridx = 1;
         gbcCD.gridy = 0;
-        gbcCD.insets = fieldMargin;
+		Insets fieldMargin = new Insets(10, 0, 10, 15);
+		gbcCD.insets = fieldMargin;
         cdInfoPanel.add(titleTextField, gbcCD);
 
         gbcCD.gridx = 2;
@@ -258,25 +254,16 @@ public class EditCDDialog extends JDialog {
         // Buttons Panel ở phía dưới
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBorder(new EmptyBorder(10, 20, 20, 20));
-        cancelButton = new RoundedButton("Hủy", 10, new Color(255, 77, 77), new Color(204, 0, 0), new Color(204, 0, 0));
-        saveButton = new RoundedButton("Lưu", 10, new Color(0, 155, 229), new Color(0, 104, 190), new Color(0, 104, 190));
+	    JButton cancelButton = new RoundedButton("Hủy", 10, new Color(255, 77, 77), new Color(204, 0, 0), new Color(204, 0, 0));
+	    JButton saveButton = new RoundedButton("Lưu", 10, new Color(0, 155, 229), new Color(0, 104, 190), new Color(0, 104, 190));
         buttonPanel.add(cancelButton);
         buttonPanel.add(saveButton);
         add(buttonPanel, BorderLayout.SOUTH);
 
-        saveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                saveCD();
-            }
-        });
-
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                isSaveClicked = false;
-                dispose();
-            }
+        saveButton.addActionListener(e -> saveCD());
+        cancelButton.addActionListener(e -> {
+            isSaveClicked = false;
+            dispose();
         });
 
         pack();
@@ -285,6 +272,22 @@ public class EditCDDialog extends JDialog {
 
     public boolean isSaveClicked() { return isSaveClicked; }
 
+    private double parseDoubleField(JTextField field) {
+        try {
+            return Double.parseDouble(field.getText().trim());
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
+    }
+
+    private int parseIntField(JTextField field) {
+        try {
+            return Integer.parseInt(field.getText().trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
     private void saveCD() {
         try {
             String title = titleTextField.getText().trim();
@@ -292,9 +295,9 @@ public class EditCDDialog extends JDialog {
             String dimensions = dimensionsTextField.getText().trim();
             String weight = weightTextField.getText().trim();
             String description = descriptionTextArea.getText().trim();
-            double value  = Double.parseDouble(sellingPriceTextField.getText().trim());
-            double price  = Double.parseDouble(importPriceTextField.getText().trim());
-            int quantity = Integer.parseInt(quantityTextField.getText().trim());
+            double value  = parseDoubleField(sellingPriceTextField);
+            double price  = parseDoubleField(importPriceTextField);
+            int quantity = parseIntField(quantityTextField);
             String artists = artistTextField.getText().trim();
             String recordLabel = recordLabelTextField.getText().trim();
             String tracklist = trackListTextArea.getText().trim();
@@ -320,7 +323,7 @@ public class EditCDDialog extends JDialog {
             cdToEdit.setGenre(genre);
             cdToEdit.setReleaseDate(releaseDate);
 
-            boolean success = CDDAO.getInstance().updateCD(cdToEdit);
+            boolean success = new CDController().updateCD(cdToEdit);
             if (success) {
                 JOptionPane.showMessageDialog(this, "Cập nhật CD thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 isSaveClicked = true;

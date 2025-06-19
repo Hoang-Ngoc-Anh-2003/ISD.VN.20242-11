@@ -7,7 +7,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.util.List;
-import DAO.CDDAO;
+import Controller.CDController;
 import Model.CD;
 import GUI.component.ButtonAction.EditButtonAction;
 import GUI.component.ButtonUI.*;
@@ -20,17 +20,25 @@ import Interface.ReloadablePanel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-// CDPanel - Quản lý danh sách CD
+/**
+ * Panel hiển thị danh sách và quản lý đĩa CD
+ */
 public class CDPanel extends JPanel implements ReloadablePanel {
     private JTable table;
     private DefaultTableModel tableModel;
     private JButton btnAdd;
-    private CDDAO cdDAO;
+    private CDController cdController; // Thay đổi từ CDDAO sang CDController
 
+    /**
+     * Khởi tạo CDPanel
+     */
     public CDPanel() {
         boolean canManage = Session.isAdminFlag || Session.isManagerFlag;
         setLayout(new BorderLayout(10, 10));
-        cdDAO = new CDDAO();
+
+        // Sử dụng CDController thay vì CDDAO
+        cdController = new CDController();
+
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Header chứa nút "Thêm CD"
@@ -78,16 +86,16 @@ public class CDPanel extends JPanel implements ReloadablePanel {
         table.setSelectionForeground(table.getForeground());
 
         if (canManage) {
-            // Admin/Manager: edit/delete
+            // Admin/Manager: hiển thị nút thêm và các nút sửa/xóa
             btnAdd.setVisible(true);
             actionColumn.setPreferredWidth(150);
             table.getColumnModel().getColumn(5).setCellRenderer(new EditButtonRenderer());
             table.getColumnModel().getColumn(5).setCellEditor(new EditButtonAction(table, this));
         } else {
             btnAdd.setVisible(false);
-            // render Details button in action column
+            // Hiển thị nút Chi tiết trong cột Hành động
             table.getColumnModel().getColumn(5).setCellRenderer((TableCellRenderer) (tbl, val, sel, focus, r, c) -> new JButton("Chi Tiết"));
-            // handle Details clicks
+            // Xử lý sự kiện khi nhấp vào nút Chi tiết
             table.addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     int col = table.columnAtPoint(e.getPoint());
@@ -95,7 +103,7 @@ public class CDPanel extends JPanel implements ReloadablePanel {
                     if (col == 5 && row >= 0) {
                         int modelRow = table.convertRowIndexToModel(row);
                         int productId = (int) tableModel.getValueAt(modelRow, 0);
-                        CD cd = cdDAO.getCDInfor(productId);
+                        CD cd = cdController.getCDInfo(productId);
                         new ViewCDDialog((Frame) SwingUtilities.getWindowAncestor(CDPanel.this), cd).setVisible(true);
                     }
                 }
@@ -111,21 +119,25 @@ public class CDPanel extends JPanel implements ReloadablePanel {
         add(headerPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
 
+        // Xử lý sự kiện cho nút "Thêm CD"
         btnAdd.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(CDPanel.this);
-                AddCDDialog addCDDialog = new AddCDDialog(parentFrame, "Thêm CD", true); // Thêm title và modal
+                AddCDDialog addCDDialog = new AddCDDialog(parentFrame, "Thêm CD", true);
                 addCDDialog.setVisible(true);
-                if (addCDDialog.isSaveClicked()) { // Kiểm tra nếu nút "Lưu" đã được nhấn (nếu bạn đã thêm logic này vào AddBookDialog)
+                if (addCDDialog.isSaveClicked()) {
                     loadCDs();
                 }
             }
         });
     }
 
+    /**
+     * Tải danh sách CD từ cơ sở dữ liệu và hiển thị lên bảng
+     */
     public void loadCDs() {
-        List<CD> cds = cdDAO.getAllCDs();
+        List<CD> cds = cdController.getAllCDs();
         tableModel.setRowCount(0);
         for (CD cd : cds) {
             tableModel.addRow(new Object[]{
@@ -133,11 +145,14 @@ public class CDPanel extends JPanel implements ReloadablePanel {
                 cd.getPrice(), cd.getQuantity(), ""
             });
         }
-        System.out.println("So luong CD: " + cds.size());
+        System.out.println("Số lượng CD: " + cds.size());
     }
 
+    /**
+     * Tải lại dữ liệu CD khi có thay đổi
+     */
     @Override
     public void reloadData() {
-        loadCDs(); // gọi method load hiện tại
+        loadCDs();
     }
 }

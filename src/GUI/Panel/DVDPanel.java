@@ -6,7 +6,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.util.List;
-import DAO.*;
+import Controller.DVDController;
 import Model.*;
 import GUI.component.ButtonAction.EditButtonAction;
 import GUI.component.ButtonUI.*;
@@ -18,18 +18,28 @@ import Interface.ReloadablePanel;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+/**
+ * Panel hiển thị danh sách và quản lý các DVD
+ */
 public class DVDPanel extends JPanel implements ReloadablePanel {
     private JTable table;
     private DefaultTableModel tableModel;
     private JButton btnAdd;
-    private DVDDAO dvdDAO;
+    private DVDController dvdController; // Thay đổi từ DVDDAO sang DVDController
 
+    /**
+     * Khởi tạo DVDPanel
+     */
     public DVDPanel() {
         boolean canManage = Session.isAdminFlag || Session.isManagerFlag;
         setLayout(new BorderLayout(10, 10));
-        dvdDAO = new DVDDAO();
+
+        // Sử dụng DVDController thay vì DVDDAO
+        dvdController = new DVDController();
+
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
+        // Tạo panel chứa nút Thêm DVD
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnAdd = new RoundedButton("+ Thêm DVD", 15, new Color(0, 155, 229), new Color(0, 104, 190), new Color(0, 104, 190));
         btnAdd.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -79,9 +89,9 @@ public class DVDPanel extends JPanel implements ReloadablePanel {
             table.getColumnModel().getColumn(5).setCellEditor(new EditButtonAction(table, this));
         } else {
             btnAdd.setVisible(false);
-            // render Details button in action column
+            // Hiển thị nút Chi Tiết trong cột Hành động
             table.getColumnModel().getColumn(5).setCellRenderer((TableCellRenderer)(tbl,val,sel,focus,r,c) -> new JButton("Chi Tiết"));
-            // handle click on Details button
+            // Xử lý sự kiện khi nhấp vào nút Chi Tiết
             table.addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     int col = table.columnAtPoint(e.getPoint());
@@ -89,7 +99,7 @@ public class DVDPanel extends JPanel implements ReloadablePanel {
                     if (col == 5 && row >= 0) {
                         int modelRow = table.convertRowIndexToModel(row);
                         int productId = (int) tableModel.getValueAt(modelRow, 0);
-                        DVD dvd = dvdDAO.getDVDInfor(productId);
+                        DVD dvd = dvdController.getDVDInfo(productId);
                         new ViewDVDDialog((Frame) SwingUtilities.getWindowAncestor(DVDPanel.this), dvd).setVisible(true);
                     }
                 }
@@ -98,7 +108,7 @@ public class DVDPanel extends JPanel implements ReloadablePanel {
 
         add(headerPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
-        // Action Listener for Add DVD button
+        // Xử lý sự kiện cho nút Thêm DVD
         btnAdd.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -112,16 +122,22 @@ public class DVDPanel extends JPanel implements ReloadablePanel {
         });
     }
 
+    /**
+     * Nạp danh sách DVD từ cơ sở dữ liệu và hiển thị lên bảng
+     */
     private void loadDVDs() {
-        List<DVD> dvds = dvdDAO.getAllDVDs();
+        List<DVD> dvds = dvdController.getAllDVDs();
         tableModel.setRowCount(0);
         for (DVD dvd : dvds) {
             Object[] rowData = {dvd.getProductId(), dvd.getTitle(), dvd.getDirector(), dvd.getPrice(), dvd.getQuantity(), ""};
             tableModel.addRow(rowData);
         }
-        System.out.println("So luong DVD: " + dvds.size());
+        System.out.println("Số lượng DVD: " + dvds.size());
     }
 
+    /**
+     * Tải lại dữ liệu DVD khi có thay đổi
+     */
     @Override
     public void reloadData() {
         loadDVDs();

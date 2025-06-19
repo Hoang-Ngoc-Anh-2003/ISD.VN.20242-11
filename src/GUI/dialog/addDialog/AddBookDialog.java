@@ -3,37 +3,32 @@ package GUI.dialog.addDialog;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import GUI.component.ButtonUI.*;
 import Model.*;
-import DAO.*;
+import Controller.BookController;
 import javax.swing.border.TitledBorder;
 
 public class AddBookDialog extends JDialog {
 
-    private JTextField bookTitleTextField;
-    private JTextField authorTextField;
-    private JTextField publisherTextField;
-    private JTextField pageCountTextField;
-    private JComboBox<String> languageComboBox;
-    private JComboBox<String> genreComboBox;
-    private JFormattedTextField publishDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
-    private JRadioButton paperbackRadioButton;
-    private JRadioButton hardcoverRadioButton;
-    private JFormattedTextField importDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
-    private JTextField quantityTextField;
-    private JTextField dimensionsTextField;
-    private JTextField weightTextField;
-    private JTextField sellingPriceTextField;
-    private JTextField importPriceTextField;
-    private JTextArea descriptionTextArea;
-    private JButton cancelButton;
-    private JButton saveButton;
+    private final JTextField bookTitleTextField;
+    private final JTextField authorTextField;
+    private final JTextField publisherTextField;
+    private final JTextField pageCountTextField;
+    private final JComboBox<String> languageComboBox;
+    private final JComboBox<String> genreComboBox;
+    private final JFormattedTextField publishDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
+    private final JRadioButton paperbackRadioButton;
+	private final JFormattedTextField importDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
+    private final JTextField quantityTextField;
+    private final JTextField dimensionsTextField;
+    private final JTextField weightTextField;
+    private final JTextField sellingPriceTextField;
+    private final JTextField importPriceTextField;
+    private final JTextArea descriptionTextArea;
     private boolean isSaveClicked = false;
-    private final Insets labelMargin = new Insets(10, 10, 10, 15);
-    private final Insets fieldMargin = new Insets(10, 0, 10, 15);
+    private static final Insets labelMargin = new Insets(10, 10, 10, 15);
+    private static final Insets fieldMargin = new Insets(10, 0, 10, 15);
 
     public AddBookDialog(JFrame parent, String title, boolean modal) {
         super(parent, title, modal);
@@ -153,8 +148,7 @@ public class AddBookDialog extends JDialog {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 4;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        contentPanel.add(generalInfoPanel, gbc);
+	    contentPanel.add(generalInfoPanel, gbc);
         gbc.gridwidth = 1; // Reset gridwidth
 
         // --- Thông tin bìa ---
@@ -177,7 +171,7 @@ public class AddBookDialog extends JDialog {
         gbcCover.insets = fieldMargin;
         JPanel coverTypePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         paperbackRadioButton = new JRadioButton("paperback");
-        hardcoverRadioButton = new JRadioButton("hardcover");
+	    JRadioButton hardcoverRadioButton = new JRadioButton("hardcover");
         ButtonGroup coverTypeGroup = new ButtonGroup();
         coverTypeGroup.add(paperbackRadioButton);
         coverTypeGroup.add(hardcoverRadioButton);
@@ -304,26 +298,18 @@ public class AddBookDialog extends JDialog {
         // Buttons Panel ở phía dưới
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBorder(new EmptyBorder(10, 20, 20, 20));
-        cancelButton = new RoundedButton("Hủy", 10, new Color(255, 77, 77), new Color(204, 0, 0), new Color(204, 0, 0));
-        saveButton = new RoundedButton("Lưu", 10, new Color(0, 155, 229), new Color(0, 104, 190), new Color(0, 104, 190));
+        final JButton cancelButton = new RoundedButton("Hủy", 10, new Color(255, 77, 77), new Color(204, 0, 0), new Color(204, 0, 0));
+        final JButton saveButton = new RoundedButton("Lưu", 10, new Color(0, 155, 229), new Color(0, 104, 190), new Color(0, 104, 190));
         buttonPanel.add(cancelButton);
         buttonPanel.add(saveButton);
         add(buttonPanel, BorderLayout.SOUTH); 
 
         // Action Listeners cho nút Lưu và Hủy
-        saveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                saveBook();
-            }
-        });
+        saveButton.addActionListener(e -> saveBook());
 
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                isSaveClicked = false;
-                dispose();
-            }
+        cancelButton.addActionListener(e -> {
+            isSaveClicked = false;
+            dispose();
         });
 
         pack();
@@ -334,22 +320,23 @@ public class AddBookDialog extends JDialog {
     private void saveBook() {
         System.out.println("[AddBookDialog] saveBook called");
         try {
-            // Lấy dữ liệu từ form
-            String title = bookTitleTextField.getText().trim();
-            String authors = authorTextField.getText().trim();
-            String publisher = publisherTextField.getText().trim();
-            int numPages = Integer.parseInt(pageCountTextField.getText().trim());
-            String language = (String) languageComboBox.getSelectedItem();
-            String genre = (String) genreComboBox.getSelectedItem();
-            String publicationDate = publishDateTextField.getText().trim(); // Định dạng: yyyy-MM-dd
-            String coverType = paperbackRadioButton.isSelected() ? "paperback" : "hardcover";
-            String warehouseEntryDate = importDateTextField.getText().trim();  // Định dạng: yyyy-MM-dd
-            int quantity = Integer.parseInt(quantityTextField.getText().trim());
-            String dimensions = dimensionsTextField.getText().trim();
-            String weight = weightTextField.getText().trim();
-            double value  = Double.parseDouble(sellingPriceTextField.getText().trim());
-            double price  = Double.parseDouble(importPriceTextField.getText().trim());
-            String description = descriptionTextArea.getText().trim();
+            // Lấy dữ liệu từ form (sử dụng phương thức tiện ích để tránh lặp code)
+            BookFormData data = getBookFormData();
+            String title = data.title;
+            String authors = data.authors;
+            String publisher = data.publisher;
+            int numPages = data.numPages;
+            String language = data.language;
+            String genre = data.genre;
+            String publicationDate = data.publicationDate;
+            String coverType = data.coverType;
+            String warehouseEntryDate = data.warehouseEntryDate;
+            int quantity = data.quantity;
+            String dimensions = data.dimensions;
+            String weight = data.weight;
+            double value = data.value;
+            double price = data.price;
+            String description = data.description;
 
             System.out.println("[AddBookDialog] Data collected: " + title + ", " + authors);
 
@@ -380,9 +367,10 @@ public class AddBookDialog extends JDialog {
 
             System.out.println("[AddBookDialog] Book object created: " + book);
 
-            // Gọi DAO để lưu vào database
-            boolean success = BookDAO.getInstance().addBook(book);
-            System.out.println("[AddBookDialog] BookDAO.addBook result: " + success);
+            // Gọi Controller để lưu vào database
+            BookController bookController = new BookController();
+            boolean success = bookController.addBook(book);
+            System.out.println("[AddBookDialog] BookController.addBook result: " + success);
             if (success) {
                 JOptionPane.showMessageDialog(this, "Thêm sách thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 isSaveClicked = true;
@@ -401,5 +389,29 @@ public class AddBookDialog extends JDialog {
         }
     }
 
+    // Thêm class tiện ích bên trong AddBookDialog
+    private static class BookFormData {
+        String title, authors, publisher, language, genre, publicationDate, coverType, warehouseEntryDate, dimensions, weight, description;
+        int numPages, quantity;
+        double value, price;
+    }
+    private BookFormData getBookFormData() {
+        BookFormData data = new BookFormData();
+        data.title = bookTitleTextField.getText().trim();
+        data.authors = authorTextField.getText().trim();
+        data.publisher = publisherTextField.getText().trim();
+        data.numPages = Integer.parseInt(pageCountTextField.getText().trim());
+        data.language = (String) languageComboBox.getSelectedItem();
+        data.genre = (String) genreComboBox.getSelectedItem();
+        data.publicationDate = publishDateTextField.getText().trim();
+        data.coverType = paperbackRadioButton.isSelected() ? "paperback" : "hardcover";
+        data.warehouseEntryDate = importDateTextField.getText().trim();
+        data.quantity = Integer.parseInt(quantityTextField.getText().trim());
+        data.dimensions = dimensionsTextField.getText().trim();
+        data.weight = weightTextField.getText().trim();
+        data.value = Double.parseDouble(sellingPriceTextField.getText().trim());
+        data.price = Double.parseDouble(importPriceTextField.getText().trim());
+        data.description = descriptionTextArea.getText().trim();
+        return data;
+    }
 }
-

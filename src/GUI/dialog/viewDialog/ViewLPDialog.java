@@ -5,7 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class ViewLPDialog extends JDialog {
-    private LP lp;
+    private final LP lp;
 
     public ViewLPDialog(Frame owner, LP lp) {
         super(owner, "LP Details", true);

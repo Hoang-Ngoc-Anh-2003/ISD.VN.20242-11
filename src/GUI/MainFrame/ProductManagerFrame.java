@@ -2,12 +2,10 @@ package GUI.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
-import DAO.*;
+import Controller.*;
 import GUI.Panel.*;
 import GUI.Session;
 import GUI.dialog.auth.LoginDialog;
-import GUI.MainFrame.AdminFrame;
-import GUI.MainFrame.CustomerFrame;
 
 public class ProductManagerFrame extends JFrame {
     private JPanel mainPanel;
@@ -17,10 +15,14 @@ public class ProductManagerFrame extends JFrame {
 
     public ProductManagerFrame() {
         // load counts
-        bookCount = BookDAO.getProductCount("Books");
-        dvdCount = DVDDAO.getProductCount("DVDs");
-        cdCount = CDDAO.getProductCount("CDs");
-        lpCount = LPDAO.getProductCount("LPs");
+        BookController bookController = new BookController();
+        DVDController dvdController = new DVDController();
+        CDController cdController = new CDController();
+        LPController lpController = new LPController();
+        bookCount = bookController.countProducts("Books");
+        dvdCount = dvdController.countProducts("DVDs");
+        cdCount = cdController.countProducts("CDs");
+        lpCount = lpController.countProducts("LPs");
 
         setTitle("Product Manager Dashboard");
         setSize(1200,700);

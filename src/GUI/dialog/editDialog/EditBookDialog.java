@@ -3,40 +3,33 @@ package GUI.dialog.editDialog;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import GUI.component.ButtonUI.*;
 import Model.*;
-import DAO.*;
+import Controller.BookController;
 import javax.swing.border.TitledBorder;
 
 public class EditBookDialog extends JDialog {
 
-    private JTextField bookTitleTextField;
-    private JTextField authorTextField;
-    private JTextField publisherTextField;
-    private JTextField pageCountTextField;
-    private JComboBox<String> languageComboBox;
-    private JComboBox<String> genreComboBox;
-    private JFormattedTextField publishDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
-    private JRadioButton paperbackRadioButton;
-    private JRadioButton hardcoverRadioButton;
-    private JFormattedTextField importDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
-    private JTextField quantityTextField;
-    private JTextField dimensionsTextField;
-    private JTextField weightTextField;
-    private JTextField sellingPriceTextField;
-    private JTextField importPriceTextField;
-    private JTextArea descriptionTextArea;
-    private JButton cancelButton;
-    private JButton saveButton;
-    private boolean isSaveClicked = false;
-    private Book bookToEdit; // Thêm biến để lưu trữ thông tin sách cần sửa
-    private final Insets labelMargin = new Insets(10, 10, 10, 15);
-    private final Insets fieldMargin = new Insets(10, 0, 10, 15);
+    private final JTextField bookTitleTextField;
+    private final JTextField authorTextField;
+    private final JTextField publisherTextField;
+    private final JTextField pageCountTextField;
+    private final JComboBox<String> languageComboBox;
+    private final JComboBox<String> genreComboBox;
+    private final JFormattedTextField publishDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
+    private final JRadioButton paperbackRadioButton;
+	private final JFormattedTextField importDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
+    private final JTextField quantityTextField;
+    private final JTextField dimensionsTextField;
+    private final JTextField weightTextField;
+    private final JTextField sellingPriceTextField;
+    private final JTextField importPriceTextField;
+    private final JTextArea descriptionTextArea;
+	private boolean isSaveClicked = false;
+    private final Book bookToEdit; // Thêm biến để lưu trữ thông tin sách cần sửa
 
-    public EditBookDialog(JFrame parent, String title, boolean modal, Book book) {
+	public EditBookDialog(JFrame parent, String title, boolean modal, Book book) {
         super(parent, title, modal);
         this.bookToEdit = book; // Lưu trữ đối tượng Book được truyền vào
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -62,12 +55,14 @@ public class EditBookDialog extends JDialog {
         // Hàng 1: Tên sách - Số trang
         gbcGeneral.gridx = 0;
         gbcGeneral.gridy = 0;
-        gbcGeneral.insets = labelMargin;
+	    Insets labelMargin = new Insets(10, 10, 10, 15);
+	    gbcGeneral.insets = labelMargin;
         generalInfoPanel.add(new JLabel("Tên sách :"), gbcGeneral);
 
         gbcGeneral.gridx = 1;
         gbcGeneral.gridy = 0;
-        gbcGeneral.insets = fieldMargin;
+		Insets fieldMargin = new Insets(10, 0, 10, 15);
+		gbcGeneral.insets = fieldMargin;
         generalInfoPanel.add(bookTitleTextField = new JTextField(20), gbcGeneral);
         bookTitleTextField.setText(bookToEdit.getTitle()); // Điền thông tin
 
@@ -152,8 +147,7 @@ public class EditBookDialog extends JDialog {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 4;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        contentPanel.add(generalInfoPanel, gbc);
+		contentPanel.add(generalInfoPanel, gbc);
         gbc.gridwidth = 1; // Reset gridwidth
 
         // --- Thông tin bìa ---
@@ -176,7 +170,7 @@ public class EditBookDialog extends JDialog {
         gbcCover.insets = fieldMargin;
         JPanel coverTypePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         paperbackRadioButton = new JRadioButton("paperback");
-        hardcoverRadioButton = new JRadioButton("hardcover");
+	    JRadioButton hardcoverRadioButton = new JRadioButton("hardcover");
         ButtonGroup coverTypeGroup = new ButtonGroup();
         coverTypeGroup.add(paperbackRadioButton);
         coverTypeGroup.add(hardcoverRadioButton);
@@ -309,26 +303,17 @@ public class EditBookDialog extends JDialog {
         // Buttons Panel ở phía dưới
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBorder(new EmptyBorder(10, 20, 20, 20));
-        cancelButton = new RoundedButton("Hủy", 10, new Color(255, 77, 77), new Color(204, 0, 0), new Color(204, 0, 0));
-        saveButton = new RoundedButton("Lưu", 10, new Color(0, 155, 229), new Color(0, 104, 190), new Color(0, 104, 190));
+	    JButton cancelButton = new RoundedButton("Hủy", 10, new Color(255, 77, 77), new Color(204, 0, 0), new Color(204, 0, 0));
+	    JButton saveButton = new RoundedButton("Lưu", 10, new Color(0, 155, 229), new Color(0, 104, 190), new Color(0, 104, 190));
         buttonPanel.add(cancelButton);
         buttonPanel.add(saveButton);
         add(buttonPanel, BorderLayout.SOUTH);
 
         // Action Listeners cho nút Lưu và Hủy
-        saveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                saveEditedBook();
-            }
-        });
-
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                isSaveClicked = false;
-                dispose();
-            }
+        saveButton.addActionListener(e -> saveEditedBook());
+        cancelButton.addActionListener(e -> {
+            isSaveClicked = false;
+            dispose();
         });
 
         pack();
@@ -379,8 +364,9 @@ public class EditBookDialog extends JDialog {
             book.setLanguage(language);
             book.setGenre(genre);
 
-            // Gọi DAO để lưu vào database
-            boolean success = BookDAO.getInstance().updateBook(book);
+            // Gọi Controller để lưu vào database
+            BookController bookController = new BookController();
+            boolean success = bookController.updateBook(book);
             if (success) {
                 JOptionPane.showMessageDialog(this, "Sửa thông tin sách thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 isSaveClicked = true;
@@ -395,4 +381,6 @@ public class EditBookDialog extends JDialog {
             JOptionPane.showMessageDialog(this, "Đã xảy ra lỗi: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 }
+

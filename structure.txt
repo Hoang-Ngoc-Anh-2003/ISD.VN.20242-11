@@ -1,0 +1,68 @@
+.
+├── Activity diagrams
+│   ├── Activity Diagram - Add Product
+│   ├── Activity Diagram - Update Product
+│   ├── Activity Diagram - View Product Detail
+│   ├── Activity Diagram - Place Order
+│   ├── Activity Diagram - Place Rush Order
+│   ├── Activity Diagram - Pay Order
+│   └── Activity Diagram - Business Process
+│
+├── Architectural Design
+│   ├── Analysis Diagram
+│   │   ├── Analysis Diagram - Add_Update Product
+│   │   ├── Analysis Diagram - View Product Detail
+│   │   ├── Analysis Diagram - Place Order
+│   │   ├── Analysis Diagram - Place Rush Order
+│   │   ├── Analysis Diagram - Pay Order
+│   │   └── Analysis Diagram - ALL
+│   │
+│   │
+│   ├── Communication Diagram
+│   │   ├── Communication Diagram - Add Product
+│   │   ├── Communication Diagram - Update Product
+│   │   ├── Communication Diagram - View Product Detail
+│   │   ├── Communication Diagram - Place Order
+│   │   ├── Communication Diagram - Place Rush Order
+│   │   └── Communication Diagram - Pay Order
+│   │
+│   └── Sequence Diagram
+│       ├── Sequence Diagram - Add Product
+│       ├── Sequence Diagram - Update Product
+│       ├── Sequence Diagram - View Product Detail
+│       ├── Sequence Diagram - Place Order
+│       ├── Sequence Diagram - Place Rush Order
+│       └── Sequence Diagram - Pay Order
+│
+├── Detailed Design
+│   ├── Class Diagram - Add_Update Product
+│   ├── Class Diagram - View Product Detail
+│   ├── Class Diagram - Place Order
+│   ├── Class Diagram - Place Rush Order
+│   └── Class Diagram - Pay Order
+│
+├── Programming
+│   ├── src
+│   │   ├── Controller
+│   │   ├── DAO
+│   │   ├── Database
+│   │   ├── GUI
+│   │   ├── Interface
+│   │   ├── Model
+│   │   ├── Test
+│   │   └── App.java
+│   ├── lib
+│   └── out
+│
+├── Testing
+│   ├── test
+│   │   ├── PayOrderTest.java
+│   │   ├── CartFunctionalityTest.java
+│   │   └── TestUtils.java
+│   │
+│   └── Test Plan - Unit Test.docx
+│
+├── AIMS.astah
+├── README.md
+├── SRS_Team16.docx
+└── structure.txt

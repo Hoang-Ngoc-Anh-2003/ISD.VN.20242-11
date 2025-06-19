@@ -1,6 +1,5 @@
 package DAO;
 
-import Model.BarcodeUtil;
 import Model.Product;
 
 import java.sql.*;

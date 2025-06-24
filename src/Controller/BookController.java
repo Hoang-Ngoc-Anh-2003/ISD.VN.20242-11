@@ -25,7 +25,8 @@ public class BookController extends ProductController {
                 "b.authors, b.cover_type, b.publisher, b.publication_date, b.num_pages, b.language, b.genre " +
                 "FROM products p " +
                 "INNER JOIN books b ON p.product_id = b.book_id " +
-                "WHERE p.category = 'book'";
+                "WHERE p.category = 'book' " +
+                "ORDER BY p.product_id ASC";
         return QueryUtils.executeQueryList(sql, this::createBookFromResultSet);
     }
 

@@ -25,7 +25,8 @@ public class DVDController extends ProductController {
                      "d.subtitles, d.release_date, d.genre " +
                      "FROM Products p " +
                      "INNER JOIN DVDs d ON p.product_id = d.dvd_id " +
-                     "WHERE p.category = 'DVD'";
+                     "WHERE p.category = 'DVD' " +
+                     "ORDER BY p.product_id ASC";
         return QueryUtils.executeQueryList(sql, this::createDVDFromResultSet);
     }
 

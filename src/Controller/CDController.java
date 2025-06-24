@@ -24,7 +24,8 @@ public class CDController extends ProductController {
                      "c.artists, c.record_label, c.tracklist, c.genre, c.release_date " +
                      "FROM products p " +
                      "INNER JOIN cds c ON p.product_id = c.cd_id " +
-                     "WHERE p.category = 'CD'";
+                     "WHERE p.category = 'CD' " +
+                     "ORDER BY p.product_id ASC";
         return QueryUtils.executeQueryList(sql, this::createCDFromResultSet);
     }
 

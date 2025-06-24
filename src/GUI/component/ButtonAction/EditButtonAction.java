@@ -1,7 +1,6 @@
 package GUI.component.ButtonAction;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 
 import java.awt.*;
@@ -21,7 +20,8 @@ import Controller.ProductController;
 public class EditButtonAction extends AbstractCellEditor implements TableCellEditor {
     private JPanel panel;
     private int row;
-    
+    private boolean isCellEditing = false;
+
     public EditButtonAction(JTable table, ReloadablePanel reloadablePanel) {
         panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
 
@@ -31,57 +31,88 @@ public class EditButtonAction extends AbstractCellEditor implements TableCellEdi
         btnEdit.addActionListener(new ActionListener() {
            @Override
             public void actionPerformed(ActionEvent e) {
-                fireEditingStopped();
-                int selectedRow = table.convertRowIndexToModel(row);
-                int productId = (int) table.getModel().getValueAt(selectedRow, 0);
-                JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(table);
+               if (!isCellEditing) {
+                   return; // Prevent multiple clicks while processing
+               }
 
-                String category = ProductController.getProductCategory(productId);
-                switch (category != null ? category.toUpperCase() : "") {
-                    case "BOOK":
-                        BookController bookController = new BookController();
-                        Book book = bookController.getBookInfo(productId);
-                        EditBookDialog editBookDialog = new EditBookDialog(parentFrame, "Book Edit", true, book);
-                        editBookDialog.setVisible(true);
-                        if (editBookDialog.isSaveClicked()) {
-                            reloadablePanel.reloadData();
-                        }
-                        break;
-                    case "CD":
-                        CDController cdController = new CDController();
-                        CD cd = cdController.getCDInfo(productId);
-                        EditCDDialog editCDDialog = new EditCDDialog(parentFrame, "CD Edit", true, cd);
-                        editCDDialog.setVisible(true);
-                        break;
-                    case "DVD":
-                        DVDController dvdController = new DVDController();
-                        DVD dvd = dvdController.getDVDInfo(productId);
-                        EditDVDDialog editDVDDialog = new EditDVDDialog(parentFrame, "DVD Edit", true, dvd);
-                        editDVDDialog.setVisible(true);
-                        break;
-                    case "LP":
-                        LPController lpController = new LPController();
-                        LP lp = lpController.getLPInfo(productId);
-                        EditLPDialog editLPDialog = new EditLPDialog(parentFrame, "LP Edit", true, lp);
-                        editLPDialog.setVisible(true);
-                        break;
-                    default:
-                        JOptionPane.showMessageDialog(null, "Lỗi truy vấn dữ liệu.");
-                        break;
-                }
+               try {
+                   isCellEditing = false; // Mark as not editing before any operations
+
+                   int selectedRow = table.convertRowIndexToModel(row);
+                   int productId = (int) table.getModel().getValueAt(selectedRow, 0);
+                   JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(table);
+
+                   String category = ProductController.getProductCategory(productId);
+                   switch (category != null ? category.toUpperCase() : "") {
+                       case "BOOK":
+                           BookController bookController = new BookController();
+                           Book book = bookController.getBookInfo(productId);
+                           EditBookDialog editBookDialog = new EditBookDialog(parentFrame, "Book Edit", true, book);
+                           editBookDialog.setVisible(true);
+                           if (editBookDialog.isSaveClicked()) {
+                               reloadablePanel.reloadData();
+                           }
+                           break;
+                       case "CD":
+                           CDController cdController = new CDController();
+                           CD cd = cdController.getCDInfo(productId);
+                           EditCDDialog editCDDialog = new EditCDDialog(parentFrame, "CD Edit", true, cd);
+                           editCDDialog.setVisible(true);
+                           if (editCDDialog.isSaveClicked()) {
+                               reloadablePanel.reloadData();
+                           }
+                           break;
+                       case "DVD":
+                           DVDController dvdController = new DVDController();
+                           DVD dvd = dvdController.getDVDInfo(productId);
+                           EditDVDDialog editDVDDialog = new EditDVDDialog(parentFrame, "DVD Edit", true, dvd);
+                           editDVDDialog.setVisible(true);
+                           if (editDVDDialog.isSaveClicked()) {
+                               reloadablePanel.reloadData();
+                           }
+                           break;
+                       case "LP":
+                           LPController lpController = new LPController();
+                           LP lp = lpController.getLPInfo(productId);
+                           EditLPDialog editLPDialog = new EditLPDialog(parentFrame, "LP Edit", true, lp);
+                           editLPDialog.setVisible(true);
+                           if (editLPDialog.isSaveClicked()) {
+                               reloadablePanel.reloadData();
+                           }
+                           break;
+                       default:
+                           JOptionPane.showMessageDialog(null, "Lỗi truy vấn dữ liệu.");
+                           break;
+                   }
+               } finally {
+                   // Always call fireEditingStopped in finally block to ensure it happens
+                   SwingUtilities.invokeLater(() -> fireEditingStopped());
+               }
             }
         });
 
         btnDelete.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (!isCellEditing) {
+                    return; // Prevent multiple clicks while processing
+                }
+
+                // Lấy dữ liệu trước khi đặt isCellEditing = false
                 int selectedRow = table.convertRowIndexToModel(row);
                 int productId = (int) table.getModel().getValueAt(selectedRow, 0);
                 String displayCategory = (String) table.getModel().getValueAt(selectedRow, 2);
-                // use DAO to get actual category key for logic
                 String category = ProductController.getProductCategory(productId);
 
-                int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa sản phẩm ID " + productId + " thuộc loại " + displayCategory + "?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                // Kết thúc chỉnh sửa ngay lập tức để tránh lỗi
+                isCellEditing = false;
+                fireEditingStopped();
+
+                // Thực hiện thao tác xóa sau khi đã kết thúc chỉnh sửa
+                int confirm = JOptionPane.showConfirmDialog(null,
+                    "Bạn có chắc muốn xóa sản phẩm ID " + productId + " thuộc loại " + displayCategory + "?",
+                    "Xác nhận", JOptionPane.YES_NO_OPTION);
+
                 if (confirm == JOptionPane.YES_OPTION) {
                     boolean deleted = switch (category.toLowerCase()) {
                         case "book" -> new BookController().deleteBook(productId);
@@ -90,12 +121,13 @@ public class EditButtonAction extends AbstractCellEditor implements TableCellEdi
                         case "lp" -> new LPController().deleteLP(productId);
                         default -> false;
                     };
+
                     if (deleted) {
-                        ((DefaultTableModel) table.getModel()).removeRow(row);
                         JOptionPane.showMessageDialog(null, "Xóa thành công!");
                         reloadablePanel.reloadData();
                     } else {
-                        System.err.println("[EditButtonAction] Delete failed for productId=" + productId + ", categoryKey=" + category + ", displayCategory=" + displayCategory);
+                        System.err.println("[EditButtonAction] Delete failed for productId=" + productId +
+                            ", categoryKey=" + category + ", displayCategory=" + displayCategory);
                         JOptionPane.showMessageDialog(null, "Lỗi khi xóa.");
                     }
                 }
@@ -110,6 +142,7 @@ public class EditButtonAction extends AbstractCellEditor implements TableCellEdi
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         this.row = row;
+        this.isCellEditing = true; // Set editing flag to true when editor is activated
         return panel;
     }
 

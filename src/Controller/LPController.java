@@ -24,7 +24,8 @@ public class LPController extends ProductController {
                      "l.artists, l.record_label, l.tracklist, l.genre, l.release_date " +
                      "FROM products p " +
                      "INNER JOIN lps l ON p.product_id = l.lp_id " +
-                     "WHERE p.category = 'LP'";
+                     "WHERE p.category = 'LP' " +
+                     "ORDER BY p.product_id ASC";
         return QueryUtils.executeQueryList(sql, this::createLPFromResultSet);
     }
 

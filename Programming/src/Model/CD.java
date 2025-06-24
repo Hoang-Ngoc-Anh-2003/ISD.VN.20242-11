@@ -1,4 +1,4 @@
-package Model;
+package aimsfinal.Model;
 
 public class CD extends Product {
     private String artists;      // Danh sách nghệ sĩ

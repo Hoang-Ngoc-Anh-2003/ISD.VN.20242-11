@@ -1,4 +1,4 @@
-package Model;
+package aimsfinal.Model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,12 @@ public class User {
     private String role; // old single role
     private List<String> roles;
     private boolean blocked;
+
+    // Default constructor
+    public User() {
+        this.roles = new ArrayList<>();
+        this.blocked = false;
+    }
 
     public User(int userId, String username, String password, String email, String phone, String role) {
         this.userId = userId;
@@ -39,6 +45,10 @@ public class User {
     // getters and setters
     public int getUserId() { return userId; }
     public void setUserId(int userId) { this.userId = userId; }
+    
+    // Alias for getId() compatibility
+    public int getId() { return userId; }
+    public void setId(int id) { this.userId = id; }
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
@@ -61,4 +71,11 @@ public class User {
 
     public boolean isBlocked() { return blocked; }
     public void setBlocked(boolean blocked) { this.blocked = blocked; }
+    
+    // Additional methods for compatibility
+    public String getFullName() { return username; }
+    public void setFullName(String fullName) { this.username = fullName; }
+    
+    public String getAddress() { return ""; } // Placeholder
+    public void setAddress(String address) { } // Placeholder
 }

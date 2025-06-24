@@ -1,4 +1,4 @@
-package Model;
+package aimsfinal.Model;
 
 public class Book extends Product {
     private String authors;     // tác giả

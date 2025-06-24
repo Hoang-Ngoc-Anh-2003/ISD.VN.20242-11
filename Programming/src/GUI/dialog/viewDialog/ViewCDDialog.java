@@ -1,32 +1,55 @@
 package GUI.dialog.viewDialog;
 
-import Model.CD;
+import aimsfinal.Model.CD;
 import java.awt.*;
+import javax.swing.*;
 
-public class ViewCDDialog extends BaseViewDialog {
-    private final CD cd;
+public class ViewCDDialog extends JDialog {
+    private CD cd;
 
     public ViewCDDialog(Frame owner, CD cd) {
-        super(owner, "Chi tiết CD", cd);
+        super(owner, "CD Details", true);
         this.cd = cd;
-        completeInitialization(); // Gọi sau khi các biến đã được khởi tạo
+        initUI();
+        pack();
+        setLocationRelativeTo(owner);
     }
 
-    @Override
-    protected Object[][] getFields() {
-        return new Object[][] {
-            {"ID:", String.valueOf(cd.getProductId())},
-            {"Tiêu đề:", cd.getTitle()},
-            {"Nghệ sĩ:", cd.getArtists()},
-            {"Hãng thu:", cd.getRecordLabel()},
-            {"Thể loại:", cd.getGenre()},
-            {"Ngày phát hành:", cd.getReleaseDate()},
-            {"Danh sách bài hát:", cd.getTracklist()},
-            {"Kích thước:", cd.getDimensions()},
-            {"Cân nặng:", cd.getWeight()},
-            {"Giá bán:", String.format("%.2f VNĐ", cd.getPrice())},
-            {"Số lượng:", String.valueOf(cd.getQuantity())},
-            {"Mô tả:", cd.getDescription()}
-        };
+    private void initUI() {
+        JPanel panel = new JPanel(new GridLayout(0, 2, 10, 10));
+
+        panel.add(new JLabel("ID:"));
+        panel.add(new JLabel(String.valueOf(cd.getProductId())));
+
+        panel.add(new JLabel("Title:"));
+        panel.add(new JLabel(cd.getTitle()));
+
+        panel.add(new JLabel("Artists:"));
+        panel.add(new JLabel(cd.getArtists()));
+
+        panel.add(new JLabel("Record Label:"));
+        panel.add(new JLabel(cd.getRecordLabel()));
+
+        panel.add(new JLabel("Tracklist:"));
+        panel.add(new JLabel(cd.getTracklist()));
+
+        panel.add(new JLabel("Genre:"));
+        panel.add(new JLabel(cd.getGenre()));
+
+        panel.add(new JLabel("Release Date:"));
+        panel.add(new JLabel(cd.getReleaseDate()));
+
+        panel.add(new JLabel("Price:"));
+        panel.add(new JLabel(String.format("%.2f", cd.getPrice())));
+
+        panel.add(new JLabel("Quantity:"));
+        panel.add(new JLabel(String.valueOf(cd.getQuantity())));
+
+        JButton btnClose = new JButton("Close");
+        btnClose.addActionListener(e -> dispose());
+
+        getContentPane().setLayout(new BorderLayout(10, 10));
+        getContentPane().add(panel, BorderLayout.CENTER);
+        getContentPane().add(btnClose, BorderLayout.SOUTH);
     }
 }

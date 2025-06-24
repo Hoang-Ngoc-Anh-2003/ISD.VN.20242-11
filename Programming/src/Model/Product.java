@@ -1,4 +1,4 @@
-package Model;
+package aimsfinal.Model;
 
 public abstract class Product {
     protected int productId;
@@ -134,5 +134,38 @@ public abstract class Product {
 
     public void setImportPrice(String importPrice) {
         this.price = Double.parseDouble(importPrice);
+    }
+
+    // Additional methods for GUI compatibility
+    public int getId() {
+        return productId;
+    }
+
+    public void setId(int id) {
+        this.productId = id;
+    }
+
+    public String getName() {
+        return title;
+    }
+
+    public void setName(String name) {
+        this.title = name;
+    }
+
+    public int getStock() {
+        return quantity;
+    }
+
+    public void setStock(int stock) {
+        this.quantity = stock;
+    }
+
+    public String getStatus() {
+        return quantity > 0 ? "In Stock" : "Out of Stock";
+    }
+
+    public void setStatus(String status) {
+        // Status is derived from quantity, so this method is for compatibility only
     }
 }

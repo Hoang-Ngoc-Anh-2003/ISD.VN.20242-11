@@ -1,4 +1,4 @@
-package Model;
+package aimsfinal.Model;
 
 public class DVD extends Product {
     private String discType;   // Loại đĩa (Blu-ray, HD-DVD)

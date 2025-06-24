@@ -1,12 +1,13 @@
-package GUI.dialog.auth;
+package aimsfinal.GUI.dialog.auth;
 
-import Controller.UserController;
-import Model.User;
+import aimsfinal.DAO.UserDAO;
+import aimsfinal.Model.User;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 
 public class RegisterDialog extends JDialog {
     private JTextField tfUsername;
@@ -93,31 +94,36 @@ public class RegisterDialog extends JDialog {
                         "Passwords do not match", "Register", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                UserController userController = new UserController();
+                UserDAO userDAO = new UserDAO();
                 // Check for duplicate username
-                if (userController.isUsernameExists(username)) {
+                if (userDAO.usernameExists(username)) {
                     JOptionPane.showMessageDialog(RegisterDialog.this,
                         "Username already exists", "Register", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-                User user = new User(0, username, password, email, phone, "customer");
-                if (userController.registerUser(user)) {
+                
+                // Create user with roles instead of single role
+                User user = new User();
+                user.setUsername(username);
+                user.setPassword(password);
+                user.setEmail(email);
+                user.setPhone(phone);
+                user.setFullName(username); // Use username as full name for now
+                user.setRoles(Arrays.asList("customer")); // Set default role
+                user.setBlocked(false);
+                
+                boolean success = userDAO.registerUser(user);
+                if (success) {
                     JOptionPane.showMessageDialog(RegisterDialog.this,
-                        "You have successfully registered.",
-                        "Register",
-                        JOptionPane.INFORMATION_MESSAGE);
+                        "Registration successful!", "Register", JOptionPane.INFORMATION_MESSAGE);
                     succeeded = true;
                     dispose();
                 } else {
                     JOptionPane.showMessageDialog(RegisterDialog.this,
-                        "Failed to register",
-                        "Register",
-                        JOptionPane.ERROR_MESSAGE);
-                    succeeded = false;
+                        "Error registering user. Please try again.", "Register", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
-
         btnCancel.addActionListener(e -> dispose());
     }
 

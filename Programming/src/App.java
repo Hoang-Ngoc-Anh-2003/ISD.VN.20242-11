@@ -1,10 +1,14 @@
-import GUI.MainFrame.AdminFrame;
-import GUI.MainFrame.CustomerFrame;
-import GUI.MainFrame.ProductManagerFrame;
-import GUI.Session;
-import GUI.dialog.auth.LoginDialog;
-import java.util.logging.Logger;
+package aimsfinal;
+
+import aimsfinal.GUI.CustomerFrame;
+import aimsfinal.GUI.ProductManagerFrame;
+import aimsfinal.GUI.Session;
+import aimsfinal.GUI.dialog.auth.LoginDialog;
+import aimsfinal.Util.VnpayCallbackServer;
+import java.io.IOException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 
 public class App {
     private static final Logger LOGGER = Logger.getLogger(App.class.getName());
@@ -15,18 +19,26 @@ public class App {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to set Look and Feel", e);
         }
-        javax.swing.SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             // Show login dialog
             LoginDialog loginDlg = new LoginDialog(null);
             loginDlg.setVisible(true);
             if (loginDlg.isSucceeded()) {
-                // Launch frame based on role
-                if (Session.isAdminFlag) {
-                    new AdminFrame().setVisible(true);
-                } else if (Session.isManagerFlag) {
-                    new ProductManagerFrame().setVisible(true);
-                } else {
-                    new CustomerFrame().setVisible(true);
+                try {
+                    // For testing purposes, we start a server and pass it.
+                    // In a real run, MainFrame would handle this.
+                    VnpayCallbackServer testServer = new VnpayCallbackServer(8080);
+                    testServer.start();
+                    
+                    if (Session.isManager()) {
+                        new ProductManagerFrame().setVisible(true);
+                    } else {
+                        // Pass the server instance to the CustomerFrame
+                        new CustomerFrame(testServer).setVisible(true);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.println("Could not start test server.");
                 }
             } else {
                 System.exit(0);

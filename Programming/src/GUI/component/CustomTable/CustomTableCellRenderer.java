@@ -1,4 +1,4 @@
-package GUI.component.CustomTable;
+package aimsfinal.GUI.component.CustomTable;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;

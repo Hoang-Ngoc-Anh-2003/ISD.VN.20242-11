@@ -1,36 +1,44 @@
-package GUI.dialog.editDialog;
+package aimsfinal.GUI.dialog.editDialog;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import GUI.component.ButtonUI.*;
-import Model.DVD;
-import Controller.DVDController;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import aimsfinal.GUI.component.ButtonUI.*;
+import aimsfinal.Model.DVD;
+import aimsfinal.DAO.DVDDAO;
 
 import javax.swing.border.TitledBorder;
 
 public class EditDVDDialog extends JDialog {
 
-    private final JTextField titleTextField;
-    private final JTextField directorTextField;
-    private final JTextField durationTextField;
-    private final JTextField productionCompanyTextField;
-    private final JComboBox<String> languageComboBox;
-    private final JComboBox<String> subtitleComboBox;
-    private final JComboBox<String> genreComboBox;
-    private final JFormattedTextField releaseDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
-    private final JRadioButton blurayRadioButton;
-	private final JFormattedTextField importDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
-    private final JTextField quantityTextField;
-    private final JTextField dimensionsTextField;
-    private final JTextField weightTextField;
-    private final JTextField sellingPriceTextField;
-    private final JTextField importPriceTextField;
-    private final JTextArea descriptionTextArea;
-	private boolean isSaveClicked = false;
-    private final DVD dvdToEdit; // Thêm biến để lưu trữ thông tin DVD cần sửa
+    private JTextField titleTextField;
+    private JTextField directorTextField;
+    private JTextField durationTextField;
+    private JTextField productionCompanyTextField;
+    private JComboBox<String> languageComboBox;
+    private JComboBox<String> subtitleComboBox;
+    private JComboBox<String> genreComboBox;
+    private JFormattedTextField releaseDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
+    private JRadioButton blurayRadioButton;
+    private JRadioButton hdvddRadioButton;
+    private JFormattedTextField importDateTextField; // Sử dụng JFormattedTextField cho định dạng ngày
+    private JTextField quantityTextField;
+    private JTextField dimensionsTextField;
+    private JTextField weightTextField;
+    private JTextField sellingPriceTextField;
+    private JTextField importPriceTextField;
+    private JTextArea descriptionTextArea;
+    private JButton cancelButton;
+    private JButton saveButton;
+    private boolean isSaveClicked = false;
+    private DVD dvdToEdit; // Thêm biến để lưu trữ thông tin DVD cần sửa
+    private final Insets labelMargin = new Insets(10, 10, 10, 15);
+    private final Insets fieldMargin = new Insets(10, 0, 10, 15);
 
-	public EditDVDDialog(JFrame parent, String title, boolean modal, DVD dvd) {
+    public EditDVDDialog(JFrame parent, String title, boolean modal, DVD dvd) {
         super(parent, title, modal);
         this.dvdToEdit = dvd; // Lưu trữ đối tượng DVD được truyền vào
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -56,14 +64,12 @@ public class EditDVDDialog extends JDialog {
         // Hàng 1: Tiêu đề - Ngôn ngữ
         gbcGeneral.gridx = 0;
         gbcGeneral.gridy = 0;
-	    Insets labelMargin = new Insets(10, 10, 10, 15);
-	    gbcGeneral.insets = labelMargin;
+        gbcGeneral.insets = labelMargin;
         generalInfoPanel.add(new JLabel("Tiêu đề :"), gbcGeneral);
 
         gbcGeneral.gridx = 1;
         gbcGeneral.gridy = 0;
-		Insets fieldMargin = new Insets(10, 0, 10, 15);
-		gbcGeneral.insets = fieldMargin;
+        gbcGeneral.insets = fieldMargin;
         generalInfoPanel.add(titleTextField = new JTextField(20), gbcGeneral);
         titleTextField.setText(dvdToEdit.getTitle()); // Điền thông tin
 
@@ -155,7 +161,8 @@ public class EditDVDDialog extends JDialog {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 4;
-		contentPanel.add(generalInfoPanel, gbc);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        contentPanel.add(generalInfoPanel, gbc);
         gbc.gridwidth = 1; // Reset gridwidth
 
         // --- Thông tin đĩa ---
@@ -178,7 +185,7 @@ public class EditDVDDialog extends JDialog {
         gbcDisc.insets = fieldMargin;
         JPanel discTypePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         blurayRadioButton = new JRadioButton("Blu-ray");
-	    JRadioButton hdvddRadioButton = new JRadioButton("HD-DVD");
+        hdvddRadioButton = new JRadioButton("HD-DVD");
         ButtonGroup discTypeGroup = new ButtonGroup();
         discTypeGroup.add(blurayRadioButton);
         discTypeGroup.add(hdvddRadioButton);
@@ -311,17 +318,26 @@ public class EditDVDDialog extends JDialog {
         // Buttons Panel ở phía dưới
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBorder(new EmptyBorder(10, 20, 20, 20));
-	    JButton cancelButton = new RoundedButton("Hủy", 10, new Color(255, 77, 77), new Color(204, 0, 0), new Color(204, 0, 0));
-	    JButton saveButton = new RoundedButton("Lưu", 10, new Color(0, 155, 229), new Color(0, 104, 190), new Color(0, 104, 190));
+        cancelButton = new RoundedButton("Hủy", 10, new Color(255, 77, 77), new Color(204, 0, 0), new Color(204, 0, 0));
+        saveButton = new RoundedButton("Lưu", 10, new Color(0, 155, 229), new Color(0, 104, 190), new Color(0, 104, 190));
         buttonPanel.add(cancelButton);
         buttonPanel.add(saveButton);
         add(buttonPanel, BorderLayout.SOUTH);
 
         // Action Listeners cho nút Lưu và Hủy
-        saveButton.addActionListener(e -> saveDVD());
-        cancelButton.addActionListener(e -> {
-            isSaveClicked = false;
-            dispose();
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveEditedDVD();
+            }
+        });
+
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                isSaveClicked = false;
+                dispose();
+            }
         });
 
         pack();
@@ -330,45 +346,24 @@ public class EditDVDDialog extends JDialog {
 
     public boolean isSaveClicked() { return isSaveClicked; }
 
-    private double parseDoubleField(JTextField field) {
+    private void saveEditedDVD() {
         try {
-            return Double.parseDouble(field.getText().trim());
-        } catch (NumberFormatException e) {
-            return 0.0;
-        }
-    }
-
-    private int parseIntField(JTextField field) {
-        try {
-            return Integer.parseInt(field.getText().trim());
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
-
-    private void copyUneditableFields(DVD from, DVD to) {
-        to.setProductId(from.getProductId());
-        to.setCategory(from.getCategory());
-        to.setBarcode(from.getBarcode());
-    }
-
-    private void saveDVD() {
-        try {
+            // Lấy dữ liệu từ form
             String title = titleTextField.getText().trim();
             String director = directorTextField.getText().trim();
-            int runtime = parseIntField(durationTextField);
+            int runtime = Integer.parseInt(durationTextField.getText().trim());
             String studio = productionCompanyTextField.getText().trim();
             String language = (String) languageComboBox.getSelectedItem();
             String subtitles = (String) subtitleComboBox.getSelectedItem();
             String genre = (String) genreComboBox.getSelectedItem();
-            String releaseDate = releaseDateTextField.getText().trim();
+            String releaseDate = releaseDateTextField.getText().trim(); // Định dạng: yyyy-MM-dd
             String discType = blurayRadioButton.isSelected() ? "Blu-ray" : "HD-DVD";
-            String warehouseEntryDate = importDateTextField.getText().trim();
-            int quantity = parseIntField(quantityTextField);
+            String warehouseEntryDate = importDateTextField.getText().trim(); // Định dạng: yyyy-MM-dd
+            int quantity = Integer.parseInt(quantityTextField.getText().trim());
             String dimensions = dimensionsTextField.getText().trim();
             String weight = weightTextField.getText().trim();
-            double value = parseDoubleField(sellingPriceTextField);
-            double price = parseDoubleField(importPriceTextField);
+            double value = Double.parseDouble(sellingPriceTextField.getText().trim());
+            double price = Double.parseDouble(importPriceTextField.getText().trim());
             String description = descriptionTextArea.getText().trim();
 
             // Kiểm tra dữ liệu bắt buộc
@@ -378,10 +373,12 @@ public class EditDVDDialog extends JDialog {
             }
 
             DVD dvd = new DVD();
-            copyUneditableFields(dvdToEdit, dvd);
+            dvd.setProductId(dvdToEdit.getProductId());
             dvd.setTitle(title);
+            dvd.setCategory(dvdToEdit.getCategory());
             dvd.setPrice(price);
             dvd.setValue(value);
+            dvd.setBarcode(dvdToEdit.getBarcode());
             dvd.setDescription(description);
             dvd.setQuantity(quantity);
             dvd.setWeight(weight);
@@ -396,8 +393,8 @@ public class EditDVDDialog extends JDialog {
             dvd.setReleaseDate(releaseDate.isEmpty() ? null : releaseDate);
             dvd.setGenre(genre);
 
-            // Gọi Controller để lưu vào database
-            boolean success = new DVDController().updateDVD(dvd);
+            // Gọi DAO để lưu vào database
+            boolean success = DVDDAO.getInstance().updateDVD(dvd);
             if (success) {
                 JOptionPane.showMessageDialog(this, "Cập nhật thông tin DVD thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 isSaveClicked = true;

@@ -1,4 +1,4 @@
-package GUI.component.ButtonUI;
+package aimsfinal.GUI.component.ButtonUI;
 
 import javax.swing.*;
 import java.awt.*;

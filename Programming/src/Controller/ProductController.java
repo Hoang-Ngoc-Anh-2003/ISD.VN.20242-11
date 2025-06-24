@@ -1,66 +1,82 @@
-package Controller;
+package aimsfinal.Controller;
 
-import Model.DatabaseConnector;
-import java.sql.*;
+import aimsfinal.DAO.OrderItemDAO;
+import aimsfinal.DAO.ProductDAO;
+import aimsfinal.Model.OrderItem;
+import aimsfinal.Model.Product;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 
-/**
- * Controller quản lý các thao tác liên quan đến sản phẩm
- */
-public abstract class ProductController {
+public class ProductController {
+    private ProductDAO productDAO;
+    private OrderItemDAO orderItemDAO;
 
-    /**
-     * Lấy thông tin loại sản phẩm (book, cd, dvd, lp) theo ID
-     *
-     * @param productId ID của sản phẩm cần truy vấn
-     * @return Loại sản phẩm (category)
-     */
-    public static String getProductCategory(int productId) {
-        String category = null;
-        String sql = "SELECT category FROM Products WHERE product_id = ?";
-
-        try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setInt(1, productId);
-            ResultSet rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                category = rs.getString("category");
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi lấy loại sản phẩm: " + e.getMessage());
-        }
-
-        return category;
+    public ProductController() {
+        productDAO = new ProductDAO();
+        orderItemDAO = new OrderItemDAO();
     }
-    
-    /**
-     * Đếm số lượng sản phẩm theo loại
-     *
-     * @param tableName Tên bảng cần đếm số lượng
-     * @return Số lượng sản phẩm
-     */
-    public int countProducts(String tableName) {
-        int count = 0;
 
-        // Validate tableName to prevent SQL injection
-        if (!tableName.matches("^[a-zA-Z_][a-zA-Z0-9_]*$") || tableName.equalsIgnoreCase("Products")) {
-            throw new IllegalArgumentException("Invalid or unsafe table name: " + tableName);
+    public ProductController(Connection connection) {
+        productDAO = new ProductDAO(connection);
+        orderItemDAO = new OrderItemDAO(connection);
+    }
+
+    public List<Product> getAllProducts() {
+        return productDAO.getAll();
+    }
+
+    public List<Product> searchProducts(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllProducts();
         }
-        String query = "SELECT COUNT(*) FROM " + tableName;
-        // Suppress IDE warning: tableName is validated above
-        // noinspection SqlSourceToSinkFlow
-        try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
+        return productDAO.search(keyword);
+    }
 
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi đếm số lượng sản phẩm: " + e.getMessage());
+    public Product getProductById(int id) {
+        return productDAO.getById(id);
+    }
+
+    // Additional methods for GUI compatibility
+    public boolean addProduct(Product product) {
+        try {
+            return productDAO.insertProduct(product) > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
+    }
 
-        return count;
+    public boolean updateProduct(Product product) {
+        try {
+            return productDAO.updateProduct(product);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean deleteProduct(int productId) {
+        try {
+            productDAO.deleteProduct(productId);
+            return true; // Assume success if no exception
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public void updateStockAfterOrder(int orderId) throws SQLException {
+        List<OrderItem> items = orderItemDAO.getOrderItemsByOrderId(orderId);
+        if (items == null || items.isEmpty()) {
+            // This is a critical issue if an order exists but has no items.
+            throw new SQLException("Cannot update stock: No items found for order ID " + orderId);
+        }
+        
+        for (OrderItem item : items) {
+            // Let the SQLException from updateStock propagate up to the CheckoutManager
+            // to trigger a transaction rollback if anything fails.
+            productDAO.updateStock(item.getProductId(), item.getQuantity());
+        }
     }
 }

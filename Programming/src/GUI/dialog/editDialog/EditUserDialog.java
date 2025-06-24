@@ -1,19 +1,18 @@
 package GUI.dialog.editDialog;
 
-import Controller.UserController;
-import Model.User;
-
-import javax.swing.*;
+import aimsfinal.DAO.UserDAO;
+import aimsfinal.Model.User;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.List;
+import javax.swing.*;
 
 public class EditUserDialog extends JDialog {
-    private final JTextField tfUsername;
-    private final JTextField tfEmail;
-    private final JTextField tfPhone;
-    private final JCheckBox cbBlocked;
-    private final JList<String> listRoles;
+    private JTextField tfUsername;
+    private JTextField tfEmail;
+    private JTextField tfPhone;
+    private JCheckBox cbBlocked;
+    private JList<String> listRoles;
     private boolean saved;
 
     public EditUserDialog(Frame parent, User user) {
@@ -42,8 +41,8 @@ public class EditUserDialog extends JDialog {
         cbBlocked = new JCheckBox(); cbBlocked.setSelected(user.isBlocked());
         gbc.gridx = 1; panel.add(cbBlocked, gbc);
         // Roles selection
-        UserController userController = new UserController();
-        List<String> roles = userController.getAllRoles();
+        UserDAO dao = new UserDAO();
+        List<String> roles = dao.getAllRoles();
         gbc.gridx = 0; gbc.gridy = 4; panel.add(new JLabel("Roles:"), gbc);
         listRoles = new JList<>(new DefaultListModel<>());
         DefaultListModel<String> model = (DefaultListModel<String>) listRoles.getModel();
@@ -74,7 +73,7 @@ public class EditUserDialog extends JDialog {
             user.setPhone(tfPhone.getText().trim());
             user.setBlocked(cbBlocked.isSelected());
             user.setRoles(listRoles.getSelectedValuesList());
-            if (new UserController().updateUser(user)) {
+            if (new UserDAO().updateUser(user)) {
                 saved = true;
                 dispose();
             } else {

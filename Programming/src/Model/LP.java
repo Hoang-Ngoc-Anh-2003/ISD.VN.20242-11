@@ -1,4 +1,4 @@
-package Model;
+package aimsfinal.Model;
 
 public class LP extends Product {
     private String artists;      // Danh sách nghệ sĩ

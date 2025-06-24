@@ -1,13 +1,13 @@
-package GUI.dialog.auth;
+package aimsfinal.GUI.dialog.auth;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import Controller.UserController;
-import GUI.Session;
-import Model.User;
-import GUI.dialog.auth.RegisterDialog;
+import aimsfinal.DAO.UserDAO;
+import aimsfinal.GUI.Session;
+import aimsfinal.Model.User;
+import aimsfinal.GUI.dialog.auth.RegisterDialog;
 import java.util.List;
 
 public class LoginDialog extends JDialog {
@@ -54,13 +54,13 @@ public class LoginDialog extends JDialog {
         setResizable(false);
         setLocationRelativeTo(parent);
 
-        UserController userController = new UserController();
+        UserDAO userDAO = new UserDAO();
 
         btnLogin.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String username = tfUsername.getText().trim();
                 String password = new String(pfPassword.getPassword());
-                User user = userController.getUserByUsername(username);
+                User user = userDAO.getUserByUsername(username);
                 if (user == null) {
                     JOptionPane.showMessageDialog(LoginDialog.this,
                             "Invalid username or password",
@@ -69,7 +69,7 @@ public class LoginDialog extends JDialog {
                     tfUsername.setText("");
                     pfPassword.setText("");
                     succeeded = false;
-                } else if (userController.isUserBlocked(username)) {
+                } else if (user.isBlocked()) {
                     JOptionPane.showMessageDialog(LoginDialog.this,
                             "Tài khoản đã bị chặn",
                             "Login",
@@ -77,7 +77,7 @@ public class LoginDialog extends JDialog {
                     tfUsername.setText("");
                     pfPassword.setText("");
                     succeeded = false;
-                } else if (userController.validateUser(username, password)) {
+                } else if (userDAO.validateUser(username, password)) {
                     // handle multiple roles: prompt if more than one
                     List<String> roles = user.getRoles();
                     String chosenRole;
@@ -99,9 +99,7 @@ public class LoginDialog extends JDialog {
                         chosenRole = roles.get(0);
                     }
                     user.setRole(chosenRole);
-                    Session.currentUser = user;
-                    Session.isAdminFlag = "admin".equalsIgnoreCase(chosenRole);
-                    Session.isManagerFlag = "product_manager".equalsIgnoreCase(chosenRole);
+                    Session.setCurrentUser(user);
                     succeeded = true;
                     dispose();
                 } else {
@@ -131,5 +129,13 @@ public class LoginDialog extends JDialog {
 
     public boolean isSucceeded() {
         return succeeded;
+    }
+
+    // Additional method for GUI compatibility
+    public User getLoggedInUser() {
+        if (succeeded) {
+            return Session.getCurrentUser();
+        }
+        return null;
     }
 }

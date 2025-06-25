@@ -157,27 +157,18 @@ public class UserController {
      * Cập nhật thông tin người dùng
      */
     public boolean updateUser(User user) {
-        String sql = "UPDATE users SET email = ?, phone = ?, blocked = ?, role = ? WHERE username = ?";
+        String sql = "UPDATE users SET username = ?, email = ?, phone = ?, blocked = ?, role = ? WHERE user_id = ?";
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, user.getEmail());
-            pst.setString(2, user.getPhone());
-            pst.setBoolean(3, user.isBlocked());
-            pst.setString(4, user.getRole());
-            pst.setString(5, user.getUsername());
+            pst.setString(1, user.getUsername());
+            pst.setString(2, user.getEmail());
+            pst.setString(3, user.getPhone());
+            pst.setBoolean(4, user.isBlocked());
+            pst.setString(5, user.getRole());
+            pst.setInt(6, user.getUserId());
             boolean updated = pst.executeUpdate() > 0;
             if (updated) {
-                // Lấy userId để cập nhật roles
-                String getIdSql = "SELECT user_id FROM users WHERE username = ?";
-                try (PreparedStatement idPst = conn.prepareStatement(getIdSql)) {
-                    idPst.setString(1, user.getUsername());
-                    try (ResultSet rs = idPst.executeQuery()) {
-                        if (rs.next()) {
-                            int userId = rs.getInt("user_id");
-                            setUserRoles(userId, user.getRoles());
-                        }
-                    }
-                }
+                setUserRoles(user.getUserId(), user.getRoles());
             }
             return updated;
         } catch (SQLException e) {

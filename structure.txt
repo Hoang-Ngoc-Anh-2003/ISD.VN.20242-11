@@ -47,25 +47,36 @@
 │   └── Class Diagram - Pay Order
 │
 ├── Programming
-│   ├── src
-│   │   ├── Controller
-│   │   ├── DAO
-│   │   ├── Database
-│   │   ├── GUI
-│   │   ├── Interface
-│   │   ├── Model
-│   │   ├── Test
-│   │   └── App.java
-│   ├── lib
-│   └── out
-│
-├── Testing
-│   ├── test
-│   │   ├── PayOrderTest.java
-│   │   ├── CartFunctionalityTest.java
-│   │   └── TestUtils.java
-│   │
-│   └── Test Plan - Unit Test.docx
+|   |
+│   ├── aimsAdmin
+│   │   ├── src
+|   │   │   ├── controller
+|   │   │   ├── Interface
+|   │   │   ├── model
+|   │   │   ├── Utils
+|   │   │   ├── view
+|   │   │   └── App.java
+|   │   ├── lib
+|   │   ├── out
+|   │   └──Test
+|   |
+│   └── aimsCustomer
+|       ├── src
+|       │   ├── Controller
+|       │   ├── DAO
+|       │   ├── Database
+|       │   ├── GUI
+|       │   ├── Interface
+|       │   ├── Model
+|       │   ├── VNPay
+|       │   ├── web
+|       │   ├── Util
+|       │   ├── Test
+|       │   └── App.java
+|       ├── lib
+|       ├── out
+|       └──Test
+|
 │
 ├── AIMS.astah
 ├── README.md

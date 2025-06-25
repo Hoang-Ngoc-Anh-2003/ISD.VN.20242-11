@@ -1,4 +1,4 @@
-package GUI.dialog.editDialog;
+package aimsfinal.GUI.dialog.editDialog;
 
 import aimsfinal.DAO.UserDAO;
 import aimsfinal.Model.User;

@@ -1,4 +1,4 @@
-package GUI.dialog.viewDialog;
+package aimsfinal.GUI.dialog.viewDialog;
 
 import aimsfinal.Model.DVD;
 import java.awt.*;

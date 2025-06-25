@@ -1,4 +1,4 @@
-package VNPay;
+package aimsfinal.VNPay;
 
 import java.io.IOException;
 import java.net.URLEncoder;

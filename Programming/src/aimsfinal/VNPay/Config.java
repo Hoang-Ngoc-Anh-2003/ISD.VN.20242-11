@@ -1,4 +1,4 @@
-package VNPay;
+package aimsfinal.VNPay;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;

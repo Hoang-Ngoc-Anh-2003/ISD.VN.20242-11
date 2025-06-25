@@ -5,9 +5,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    private static final String URL = "jdbc:postgresql://localhost:5432/isd"; // Thay "aims" bằng tên database của bạn
+    private static final String URL = "jdbc:postgresql://localhost:5432/aimsdb"; // Thay "aims" bằng tên database của bạn
     private static final String USER = "postgres"; // Thay bằng username của bạn
-    private static final String PASSWORD = "kai2604"; // Thay bằng password của bạn
+    private static final String PASSWORD = "admin"; // Thay bằng password của bạn
 
     public static Connection getConnection() throws SQLException {
         try {

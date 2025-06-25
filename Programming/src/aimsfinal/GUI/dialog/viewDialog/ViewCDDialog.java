@@ -1,15 +1,15 @@
-package GUI.dialog.viewDialog;
+package aimsfinal.GUI.dialog.viewDialog;
 
-import aimsfinal.Model.LP;
+import aimsfinal.Model.CD;
 import java.awt.*;
 import javax.swing.*;
 
-public class ViewLPDialog extends JDialog {
-    private LP lp;
+public class ViewCDDialog extends JDialog {
+    private CD cd;
 
-    public ViewLPDialog(Frame owner, LP lp) {
-        super(owner, "LP Details", true);
-        this.lp = lp;
+    public ViewCDDialog(Frame owner, CD cd) {
+        super(owner, "CD Details", true);
+        this.cd = cd;
         initUI();
         pack();
         setLocationRelativeTo(owner);
@@ -19,31 +19,31 @@ public class ViewLPDialog extends JDialog {
         JPanel panel = new JPanel(new GridLayout(0, 2, 10, 10));
 
         panel.add(new JLabel("ID:"));
-        panel.add(new JLabel(String.valueOf(lp.getProductId())));
+        panel.add(new JLabel(String.valueOf(cd.getProductId())));
 
         panel.add(new JLabel("Title:"));
-        panel.add(new JLabel(lp.getTitle()));
+        panel.add(new JLabel(cd.getTitle()));
 
         panel.add(new JLabel("Artists:"));
-        panel.add(new JLabel(lp.getArtists()));
+        panel.add(new JLabel(cd.getArtists()));
 
         panel.add(new JLabel("Record Label:"));
-        panel.add(new JLabel(lp.getRecordLabel()));
+        panel.add(new JLabel(cd.getRecordLabel()));
 
         panel.add(new JLabel("Tracklist:"));
-        panel.add(new JLabel(lp.getTracklist()));
+        panel.add(new JLabel(cd.getTracklist()));
 
         panel.add(new JLabel("Genre:"));
-        panel.add(new JLabel(lp.getGenre()));
+        panel.add(new JLabel(cd.getGenre()));
 
         panel.add(new JLabel("Release Date:"));
-        panel.add(new JLabel(lp.getReleaseDate()));
+        panel.add(new JLabel(cd.getReleaseDate()));
 
         panel.add(new JLabel("Price:"));
-        panel.add(new JLabel(String.format("%.2f", lp.getPrice())));
+        panel.add(new JLabel(String.format("%.2f", cd.getPrice())));
 
         panel.add(new JLabel("Quantity:"));
-        panel.add(new JLabel(String.valueOf(lp.getQuantity())));
+        panel.add(new JLabel(String.valueOf(cd.getQuantity())));
 
         JButton btnClose = new JButton("Close");
         btnClose.addActionListener(e -> dispose());

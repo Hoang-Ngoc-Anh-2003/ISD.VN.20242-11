@@ -1,3 +1,4 @@
+package aimsfinal.GUI;
 import aimsfinal.GUI.dialog.CartDialog;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

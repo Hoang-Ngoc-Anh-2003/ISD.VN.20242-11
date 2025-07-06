@@ -80,5 +80,6 @@
 │
 ├── AIMS.astah
 ├── README.md
-├── SRS_Team16.docx
+├── SDD.docx
+├── SRS.docx
 └── structure.txt

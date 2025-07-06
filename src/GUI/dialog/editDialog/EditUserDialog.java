@@ -15,10 +15,12 @@ public class EditUserDialog extends JDialog {
     private final JCheckBox cbBlocked;
     private final JList<String> listRoles;
     private boolean saved;
+    private final UserController userController;
 
     public EditUserDialog(Frame parent, User user) {
         super(parent, "Sửa người dùng", true);
         setLayout(new BorderLayout());
+        userController = new UserController();
 
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -42,14 +44,13 @@ public class EditUserDialog extends JDialog {
         cbBlocked = new JCheckBox(); cbBlocked.setSelected(user.isBlocked());
         gbc.gridx = 1; panel.add(cbBlocked, gbc);
         // Roles selection
-        UserController userController = new UserController();
         List<String> roles = userController.getAllRoles();
         gbc.gridx = 0; gbc.gridy = 4; panel.add(new JLabel("Roles:"), gbc);
         listRoles = new JList<>(new DefaultListModel<>());
         DefaultListModel<String> model = (DefaultListModel<String>) listRoles.getModel();
         for (String r : roles) model.addElement(r);
         listRoles.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        // pre-select existing user roles
+
         java.util.List<String> userRoles = user.getRoles();
         java.util.List<Integer> idx = new java.util.ArrayList<>();
         for (int i = 0; i < model.size(); i++) {
@@ -74,7 +75,7 @@ public class EditUserDialog extends JDialog {
             user.setPhone(tfPhone.getText().trim());
             user.setBlocked(cbBlocked.isSelected());
             user.setRoles(listRoles.getSelectedValuesList());
-            if (new UserController().updateUser(user)) {
+            if (userController.updateUser(user)) {
                 saved = true;
                 dispose();
             } else {

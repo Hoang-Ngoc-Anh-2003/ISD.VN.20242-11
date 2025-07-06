@@ -2,11 +2,14 @@ package GUI.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.Serial;
+
 import GUI.Panel.UserPanel;
 import GUI.Session;
 import GUI.dialog.auth.LoginDialog;
 
 public class AdminFrame extends JFrame {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public AdminFrame() {
@@ -35,7 +38,7 @@ public class AdminFrame extends JFrame {
         header.add(btnLogout);
         contentPane.add(header, BorderLayout.NORTH);
 
-        // Add user management panel
+        // UserPanel
         UserPanel userPanel = new UserPanel();
         contentPane.add(userPanel, BorderLayout.CENTER);
 

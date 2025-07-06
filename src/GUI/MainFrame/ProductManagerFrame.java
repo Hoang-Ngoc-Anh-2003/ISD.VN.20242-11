@@ -8,21 +8,20 @@ import GUI.Session;
 import GUI.dialog.auth.LoginDialog;
 
 public class ProductManagerFrame extends JFrame {
-    private JPanel mainPanel;
-    private CardLayout cardLayout;
-    private JLabel lblTitle;
-    private int bookCount, dvdCount, cdCount, lpCount;
+    private final JPanel mainPanel;
+    private final CardLayout cardLayout;
+    private final JLabel lblTitle;
 
-    public ProductManagerFrame() {
+	public ProductManagerFrame() {
         // load counts
         BookController bookController = new BookController();
         DVDController dvdController = new DVDController();
         CDController cdController = new CDController();
         LPController lpController = new LPController();
-        bookCount = bookController.countProducts("Books");
-        dvdCount = dvdController.countProducts("DVDs");
-        cdCount = cdController.countProducts("CDs");
-        lpCount = lpController.countProducts("LPs");
+	    int bookCount = bookController.countProducts("Books");
+	    int dvdCount = dvdController.countProducts("DVDs");
+	    int cdCount = cdController.countProducts("CDs");
+		int lpCount = lpController.countProducts("LPs");
 
         setTitle("Product Manager Dashboard");
         setSize(1200,700);
@@ -73,19 +72,7 @@ public class ProductManagerFrame extends JFrame {
         header.add(headerLeft,BorderLayout.WEST);
         header.add(headerCenter,BorderLayout.CENTER);
         // Logout button
-        JButton btnLogout = new JButton("Đăng xuất");
-        btnLogout.addActionListener(e -> {
-            dispose();
-            LoginDialog loginDlg = new LoginDialog(null);
-            loginDlg.setVisible(true);
-            if (loginDlg.isSucceeded()) {
-                if (Session.isAdminFlag) new AdminFrame().setVisible(true);
-                else if (Session.isManagerFlag) new ProductManagerFrame().setVisible(true);
-                else new CustomerFrame().setVisible(true);
-            } else {
-                System.exit(0);
-            }
-        });
+        JButton btnLogout = getJButton();
         header.add(btnLogout, BorderLayout.EAST);
 
         // Main panel
@@ -135,6 +122,23 @@ public class ProductManagerFrame extends JFrame {
         setVisible(true);
     }
 
+    private JButton getJButton() {
+        JButton btnLogout = new JButton("Đăng xuất");
+        btnLogout.addActionListener(e -> {
+            dispose();
+            LoginDialog loginDlg = new LoginDialog(null);
+            loginDlg.setVisible(true);
+            if (loginDlg.isSucceeded()) {
+                if (Session.isAdminFlag) new AdminFrame().setVisible(true);
+                else if (Session.isManagerFlag) new ProductManagerFrame().setVisible(true);
+                else new CustomerFrame().setVisible(true);
+            } else {
+                System.exit(0);
+            }
+        });
+        return btnLogout;
+    }
+
     private JButton createSidebarButton(String name, boolean hasIcon) {
         JButton btn = new JButton(name);
         btn.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -156,7 +160,7 @@ public class ProductManagerFrame extends JFrame {
         btn.setPreferredSize(new Dimension(180,120));
         btn.setBackground(Color.WHITE);
         btn.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY,1));
-        btn.addActionListener(e -> switchPanel(cat + (cat.equals("Book")?"s":"s"),"Danh sách " + cat));
+        btn.addActionListener(e -> switchPanel(cat + ("s"),"Danh sách " + cat));
         return btn;
     }
 

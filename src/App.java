@@ -16,7 +16,6 @@ public class App {
             LOGGER.log(Level.SEVERE, "Failed to set Look and Feel", e);
         }
         javax.swing.SwingUtilities.invokeLater(() -> {
-            // Show login dialog
             LoginDialog loginDlg = new LoginDialog(null);
             loginDlg.setVisible(true);
             if (loginDlg.isSucceeded()) {

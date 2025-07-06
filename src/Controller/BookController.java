@@ -9,16 +9,8 @@ import Model.ProductResultSetUtil;
 import java.sql.*;
 import java.util.List;
 
-/**
- * Controller quản lý các thao tác liên quan đến sách
- */
 public class BookController extends ProductController {
 
-    /**
-     * Lấy danh sách tất cả sách từ cơ sở dữ liệu
-     *
-     * @return Danh sách các sách
-     */
     public List<Book> getAllBooks() {
         String sql = "SELECT p.product_id, p.title, p.category, p.value, p.price," +
                 "p.barcode, p.description, p.quantity, p.weight, p.dimensions, p.warehouse_entry_date," +
@@ -30,12 +22,6 @@ public class BookController extends ProductController {
         return QueryUtils.executeQueryList(sql, this::createBookFromResultSet);
     }
 
-    /**
-     * Lấy thông tin chi tiết của một sách theo ID
-     *
-     * @param bookId ID của sách cần truy vấn
-     * @return Đối tượng Book chứa thông tin chi tiết, hoặc null nếu không tìm thấy
-     */
     public Book getBookInfo(int bookId) {
         Book book = null;
         String sql = "SELECT p.product_id, p.title, p.category, p.value, p.price," +
@@ -61,12 +47,6 @@ public class BookController extends ProductController {
         return book;
     }
 
-    /**
-     * Thêm sách mới vào cơ sở dữ liệu
-     *
-     * @param book Đối tượng Book cần thêm
-     * @return true nếu thêm thành công, false nếu có lỗi
-     */
     public boolean addBook(Book book) {
         Connection conn = null;
         PreparedStatement pstmtBook = null;
@@ -119,12 +99,6 @@ public class BookController extends ProductController {
         return success;
     }
 
-    /**
-     * Cập nhật thông tin sách trong cơ sở dữ liệu
-     *
-     * @param book Đối tượng Book cần cập nhật
-     * @return true nếu cập nhật thành công, false nếu có lỗi
-     */
     public boolean updateBook(Book book) {
         Connection conn = null;
         PreparedStatement pstmtBook = null;
@@ -159,12 +133,6 @@ public class BookController extends ProductController {
         return success;
     }
 
-    /**
-     * Xóa sách theo ID
-     *
-     * @param bookId ID của sách cần xóa
-     * @return true nếu xóa thành công, false nếu có lỗi
-     */
     public boolean deleteBook(int bookId) {
         Connection conn = null;
         boolean success = false;

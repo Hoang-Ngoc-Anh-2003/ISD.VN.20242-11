@@ -3,17 +3,9 @@ package Controller;
 import Model.DatabaseConnector;
 import java.sql.*;
 
-/**
- * Controller quản lý các thao tác liên quan đến sản phẩm
- */
+//Controller quản lý các thao tác liên quan đến sản phẩm
 public abstract class ProductController {
 
-    /**
-     * Lấy thông tin loại sản phẩm (book, cd, dvd, lp) theo ID
-     *
-     * @param productId ID của sản phẩm cần truy vấn
-     * @return Loại sản phẩm (category)
-     */
     public static String getProductCategory(int productId) {
         String category = null;
         String sql = "SELECT category FROM Products WHERE product_id = ?";
@@ -33,13 +25,7 @@ public abstract class ProductController {
 
         return category;
     }
-    
-    /**
-     * Đếm số lượng sản phẩm theo loại
-     *
-     * @param tableName Tên bảng cần đếm số lượng
-     * @return Số lượng sản phẩm
-     */
+
     public int countProducts(String tableName) {
         int count = 0;
 

@@ -8,16 +8,8 @@ import Model.QueryUtils;
 import java.sql.*;
 import java.util.List;
 
-/**
- * Controller quản lý các thao tác liên quan đến đĩa than (LP)
- */
 public class LPController extends ProductController {
 
-    /**
-     * Lấy danh sách tất cả đĩa than từ cơ sở dữ liệu
-     *
-     * @return Danh sách các đĩa than
-     */
     public List<LP> getAllLPs() {
         String sql = "SELECT p.product_id, p.title, p.category, p.value, p.price, p.barcode, " +
                      "p.description, p.quantity, p.weight, p.dimensions, p.warehouse_entry_date, " +
@@ -29,12 +21,6 @@ public class LPController extends ProductController {
         return QueryUtils.executeQueryList(sql, this::createLPFromResultSet);
     }
 
-    /**
-     * Lấy thông tin chi tiết của một đĩa than theo ID
-     *
-     * @param lpId ID của đĩa than cần truy vấn
-     * @return Đối tượng LP chứa thông tin chi tiết, hoặc null nếu không tìm thấy
-     */
     public LP getLPInfo(int lpId) {
         LP lp = null;
         String sql = "SELECT p.product_id, p.title, p.category, p.value, p.price," +
@@ -60,12 +46,6 @@ public class LPController extends ProductController {
         return lp;
     }
 
-    /**
-     * Thêm đĩa than mới vào cơ sở dữ liệu
-     *
-     * @param lp Đối tượng LP cần thêm
-     * @return true nếu thêm thành công, false nếu có lỗi
-     */
     public boolean addLP(LP lp) {
         Connection conn = null;
         PreparedStatement pstmtLP = null;
@@ -75,13 +55,10 @@ public class LPController extends ProductController {
             conn = DatabaseConnector.getConnection();
             conn.setAutoCommit(false);
 
-            // Ensure the category is always set to "LP" (uppercase) to satisfy the DB constraint
             lp.setCategory("LP");
 
-            // Sử dụng ProductDAO để thêm vào bảng Products
             int productId = ProductDAO.insertProduct(lp, conn);
 
-            // Sau đó thêm vào bảng LPs
             String sqlLP = "INSERT INTO LPs (lp_id, artists, record_label, tracklist, genre, release_date) " +
                           "VALUES (?, ?, ?, ?, ?, ?)";
             pstmtLP = conn.prepareStatement(sqlLP);
@@ -117,12 +94,6 @@ public class LPController extends ProductController {
         return success;
     }
 
-    /**
-     * Cập nhật thông tin đĩa than trong cơ sở dữ liệu
-     *
-     * @param lp Đối tượng LP cần cập nhật
-     * @return true nếu cập nhật thành công, false nếu có lỗi
-     */
     public boolean updateLP(LP lp) {
         Connection conn = null;
         PreparedStatement pstmtLP = null;
@@ -172,12 +143,6 @@ public class LPController extends ProductController {
         return success;
     }
 
-    /**
-     * Xóa đĩa than theo ID
-     *
-     * @param lpId ID của đĩa than cần xóa
-     * @return true nếu xóa thành công, false nếu có lỗi
-     */
     public boolean deleteLP(int lpId) {
         Connection conn = null;
         boolean success = false;
@@ -200,13 +165,6 @@ public class LPController extends ProductController {
         return success;
     }
 
-    /**
-     * Tạo đối tượng LP từ ResultSet
-     *
-     * @param rs ResultSet chứa dữ liệu đĩa than
-     * @return Đối tượng LP
-     * @throws SQLException Nếu có lỗi khi truy xuất dữ liệu
-     */
     private LP createLPFromResultSet(ResultSet rs) throws SQLException {
         LP lp = new LP();
         ProductResultSetUtil.fillProductFieldsFromResultSet(lp, rs);

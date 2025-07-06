@@ -5,19 +5,19 @@ import Model.User;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class RegisterDialog extends JDialog {
-    private JTextField tfUsername;
-    private JPasswordField pfPassword;
-    private JPasswordField pfConfirm;
-    private JTextField tfEmail;
-    private JTextField tfPhone;
+    private final JTextField tfUsername;
+    private final JPasswordField pfPassword;
+    private final JPasswordField pfConfirm;
+    private final JTextField tfEmail;
+    private final JTextField tfPhone;
     private boolean succeeded;
+    private final UserController userController;
 
     public RegisterDialog(Frame parent) {
         super(parent, "Register", true);
+        userController = new UserController();
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints cs = new GridBagConstraints();
         cs.fill = GridBagConstraints.HORIZONTAL;
@@ -76,45 +76,42 @@ public class RegisterDialog extends JDialog {
         setResizable(false);
         setLocationRelativeTo(parent);
 
-        btnRegister.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String username = tfUsername.getText().trim();
-                String password = new String(pfPassword.getPassword());
-                String confirm = new String(pfConfirm.getPassword());
-                String email = tfEmail.getText().trim();
-                String phone = tfPhone.getText().trim();
-                if (username.isEmpty() || password.isEmpty() || email.isEmpty()) {
-                    JOptionPane.showMessageDialog(RegisterDialog.this,
-                        "Please fill in all required fields", "Register", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-                if (!password.equals(confirm)) {
-                    JOptionPane.showMessageDialog(RegisterDialog.this,
-                        "Passwords do not match", "Register", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                UserController userController = new UserController();
-                // Check for duplicate username
-                if (userController.isUsernameExists(username)) {
-                    JOptionPane.showMessageDialog(RegisterDialog.this,
-                        "Username already exists", "Register", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-                User user = new User(0, username, password, email, phone, "customer");
-                if (userController.registerUser(user)) {
-                    JOptionPane.showMessageDialog(RegisterDialog.this,
-                        "You have successfully registered.",
-                        "Register",
-                        JOptionPane.INFORMATION_MESSAGE);
-                    succeeded = true;
-                    dispose();
-                } else {
-                    JOptionPane.showMessageDialog(RegisterDialog.this,
-                        "Failed to register",
-                        "Register",
-                        JOptionPane.ERROR_MESSAGE);
-                    succeeded = false;
-                }
+        btnRegister.addActionListener(e -> {
+            String username = tfUsername.getText().trim();
+            String password = new String(pfPassword.getPassword());
+            String confirm = new String(pfConfirm.getPassword());
+            String email = tfEmail.getText().trim();
+            String phone = tfPhone.getText().trim();
+            if (username.isEmpty() || password.isEmpty() || email.isEmpty()) {
+                JOptionPane.showMessageDialog(RegisterDialog.this,
+                    "Please fill in all required fields", "Register", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            if (!password.equals(confirm)) {
+                JOptionPane.showMessageDialog(RegisterDialog.this,
+                    "Passwords do not match", "Register", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            User existingUser = userController.findUserByUsername(username);
+            if (existingUser != null) {
+                JOptionPane.showMessageDialog(RegisterDialog.this,
+                    "Username already exists", "Register", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            User user = new User(0, username, password, email, phone, "customer");
+            if (userController.registerUser(user)) {
+                JOptionPane.showMessageDialog(RegisterDialog.this,
+                    "You have successfully registered.",
+                    "Register",
+                    JOptionPane.INFORMATION_MESSAGE);
+                succeeded = true;
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(RegisterDialog.this,
+                    "Failed to register",
+                    "Register",
+                    JOptionPane.ERROR_MESSAGE);
+                succeeded = false;
             }
         });
 

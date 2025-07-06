@@ -8,16 +8,8 @@ import Model.ProductResultSetUtil;
 import java.sql.*;
 import java.util.List;
 
-/**
- * Controller quản lý các thao tác liên quan đến đĩa CD
- */
 public class CDController extends ProductController {
 
-    /**
-     * Lấy danh sách tất cả CD từ cơ sở dữ liệu
-     *
-     * @return Danh sách các đĩa CD
-     */
     public List<CD> getAllCDs() {
         String sql = "SELECT p.product_id, p.title, p.category, p.value, p.price, p.barcode, " +
                      "p.description, p.quantity, p.weight, p.dimensions, p.warehouse_entry_date, " +
@@ -29,12 +21,6 @@ public class CDController extends ProductController {
         return QueryUtils.executeQueryList(sql, this::createCDFromResultSet);
     }
 
-    /**
-     * Lấy thông tin chi tiết của một CD theo ID
-     *
-     * @param cdId ID của CD cần truy vấn
-     * @return Đối tượng CD chứa thông tin chi tiết, hoặc null nếu không tìm thấy
-     */
     public CD getCDInfo(int cdId) {
         CD cd = null;
         String sql = "SELECT p.product_id, p.title, p.category, p.value, p.price," +
@@ -60,12 +46,6 @@ public class CDController extends ProductController {
         return cd;
     }
 
-    /**
-     * Thêm CD mới vào cơ sở dữ liệu
-     *
-     * @param cd Đối tượng CD cần thêm
-     * @return true nếu thêm thành công, false nếu có lỗi
-     */
     public boolean addCD(CD cd) {
         Connection conn = null;
         PreparedStatement pstmtCD = null;
@@ -75,7 +55,6 @@ public class CDController extends ProductController {
             conn = DatabaseConnector.getConnection();
             conn.setAutoCommit(false);
 
-            // Ensure the Product category is always set to "CD" (uppercase) to satisfy DB constraint
             cd.setCategory("CD");
 
             // Sử dụng ProductDAO để thêm vào bảng Products
@@ -121,12 +100,6 @@ public class CDController extends ProductController {
         return success;
     }
 
-    /**
-     * Cập nhật thông tin CD trong cơ sở dữ liệu
-     *
-     * @param cd Đối tượng CD cần cập nhật
-     * @return true nếu cập nhật thành công, false nếu có lỗi
-     */
     public boolean updateCD(CD cd) {
         Connection conn = null;
         PreparedStatement pstmtCD = null;
@@ -178,12 +151,6 @@ public class CDController extends ProductController {
         return success;
     }
 
-    /**
-     * Xóa CD theo ID
-     *
-     * @param cdId ID của CD cần xóa
-     * @return true nếu xóa thành công, false nếu có lỗi
-     */
     public boolean deleteCD(int cdId) {
         Connection conn = null;
         boolean success = false;
@@ -206,13 +173,6 @@ public class CDController extends ProductController {
         return success;
     }
 
-    /**
-     * Tạo đối tượng CD từ ResultSet
-     *
-     * @param rs ResultSet chứa dữ liệu CD
-     * @return Đối tượng CD
-     * @throws SQLException Nếu có lỗi khi truy xuất dữ liệu
-     */
     private CD createCDFromResultSet(ResultSet rs) throws SQLException {
         CD cd = new CD();
         ProductResultSetUtil.fillProductFieldsFromResultSet(cd, rs);
@@ -220,9 +180,6 @@ public class CDController extends ProductController {
         return cd;
     }
 
-    /**
-     * Gán các trường media cho CD/LP từ ResultSet (dùng chung cho các controller media)
-     */
     private void setMediaFields(CD cd, ResultSet rs) throws SQLException {
         String[] fields = ControllerUtil.getMediaFieldsFromResultSet(rs);
         cd.setArtists(fields[0]);

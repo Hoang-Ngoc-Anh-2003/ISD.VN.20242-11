@@ -2,18 +2,16 @@ package GUI.dialog.auth;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import Controller.UserController;
 import GUI.Session;
 import Model.User;
-import GUI.dialog.auth.RegisterDialog;
 import java.util.List;
 
 public class LoginDialog extends JDialog {
-    private JTextField tfUsername;
-    private JPasswordField pfPassword;
+    private final JTextField tfUsername;
+    private final JPasswordField pfPassword;
     private boolean succeeded;
+    private final UserController userController;
 
     public LoginDialog(Frame parent) {
         super(parent, "Login", true);
@@ -54,73 +52,73 @@ public class LoginDialog extends JDialog {
         setResizable(false);
         setLocationRelativeTo(parent);
 
-        UserController userController = new UserController();
+        userController = new UserController();
 
-        btnLogin.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String username = tfUsername.getText().trim();
-                String password = new String(pfPassword.getPassword());
-                User user = userController.getUserByUsername(username);
-                if (user == null) {
-                    JOptionPane.showMessageDialog(LoginDialog.this,
-                            "Invalid username or password",
-                            "Login",
-                            JOptionPane.ERROR_MESSAGE);
-                    tfUsername.setText("");
-                    pfPassword.setText("");
-                    succeeded = false;
-                } else if (userController.isUserBlocked(username)) {
-                    JOptionPane.showMessageDialog(LoginDialog.this,
-                            "Tài khoản đã bị chặn",
-                            "Login",
-                            JOptionPane.ERROR_MESSAGE);
-                    tfUsername.setText("");
-                    pfPassword.setText("");
-                    succeeded = false;
-                } else if (userController.validateUser(username, password)) {
-                    // handle multiple roles: prompt if more than one
-                    List<String> roles = user.getRoles();
-                    String chosenRole;
-                    if (roles.size() > 1) {
-                        chosenRole = (String) JOptionPane.showInputDialog(
-                            LoginDialog.this,
-                            "Chọn vai trò:",
-                            "Role Selection",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            roles.toArray(new String[0]),
-                            roles.get(0)
-                        );
-                        if (chosenRole == null) {
-                            succeeded = false;
-                            return;
-                        }
-                    } else {
-                        chosenRole = roles.get(0);
+        btnLogin.addActionListener(e -> {
+            String username = tfUsername.getText().trim();
+            String password = new String(pfPassword.getPassword());
+            User user = userController.findUserByUsername(username);
+            if (user == null) {
+                JOptionPane.showMessageDialog(LoginDialog.this,
+                        "Invalid username or password",
+                        "Login",
+                        JOptionPane.ERROR_MESSAGE);
+                tfUsername.setText("");
+                pfPassword.setText("");
+                succeeded = false;
+            } else if (userController.isUserBlocked(username)) {
+                JOptionPane.showMessageDialog(LoginDialog.this,
+                        "Tài khoản đã bị chặn",
+                        "Login",
+                        JOptionPane.ERROR_MESSAGE);
+                tfUsername.setText("");
+                pfPassword.setText("");
+                succeeded = false;
+            } else if (userController.authenticateUser(username, password) != null) {
+                List<String> roles = user.getRoles();
+                String chosenRole;
+
+                if (roles == null || roles.isEmpty()) {
+                    chosenRole = user.getRole();
+                    if (chosenRole == null || chosenRole.trim().isEmpty()) {
+                        chosenRole = "customer"; // Default role
                     }
-                    user.setRole(chosenRole);
-                    Session.currentUser = user;
-                    Session.isAdminFlag = "admin".equalsIgnoreCase(chosenRole);
-                    Session.isManagerFlag = "product_manager".equalsIgnoreCase(chosenRole);
-                    succeeded = true;
-                    dispose();
+                } else if (roles.size() > 1) {
+                    chosenRole = (String) JOptionPane.showInputDialog(
+                        LoginDialog.this,
+                        "Chọn vai trò:",
+                        "Role Selection",
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        roles.toArray(new String[0]),
+                        roles.get(0)
+                    );
+                    if (chosenRole == null) {
+                        succeeded = false;
+                        return;
+                    }
                 } else {
-                    JOptionPane.showMessageDialog(LoginDialog.this,
-                            "Invalid username or password",
-                            "Login",
-                            JOptionPane.ERROR_MESSAGE);
-                    tfUsername.setText("");
-                    pfPassword.setText("");
-                    succeeded = false;
+                    chosenRole = roles.get(0);
                 }
+
+                // Sử dụng Session mới với method setCurrentUser
+                Session.setCurrentUser(user, chosenRole);
+                succeeded = true;
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(LoginDialog.this,
+                        "Invalid username or password",
+                        "Login",
+                        JOptionPane.ERROR_MESSAGE);
+                tfUsername.setText("");
+                pfPassword.setText("");
+                succeeded = false;
             }
         });
 
-        btnRegister.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                RegisterDialog rd = new RegisterDialog((Frame) getParent());
-                rd.setVisible(true);
-            }
+        btnRegister.addActionListener(e -> {
+            RegisterDialog rd = new RegisterDialog((Frame) getParent());
+            rd.setVisible(true);
         });
 
         btnCancel.addActionListener(e -> {

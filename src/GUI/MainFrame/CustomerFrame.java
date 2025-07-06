@@ -66,7 +66,6 @@ public class CustomerFrame extends JFrame {
 
         titlePanel.add(title);
 
-        // Panel phải chứa nút đăng xuất
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         rightPanel.setOpaque(false);
 

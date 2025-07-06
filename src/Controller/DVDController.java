@@ -8,16 +8,8 @@ import Model.QueryUtils;
 import java.sql.*;
 import java.util.List;
 
-/**
- * Controller quản lý các thao tác liên quan đến sản phẩm DVD
- */
 public class DVDController extends ProductController {
 
-    /**
-     * Lấy tất cả thông tin DVD từ cơ sở dữ liệu
-     *
-     * @return Danh sách các DVD
-     */
     public List<DVD> getAllDVDs() {
         String sql = "SELECT p.product_id, p.title, p.category, p.value, p.price, p.barcode, " +
                      "p.description, p.quantity, p.weight, p.dimensions, p.warehouse_entry_date, " +
@@ -30,12 +22,6 @@ public class DVDController extends ProductController {
         return QueryUtils.executeQueryList(sql, this::createDVDFromResultSet);
     }
 
-    /**
-     * Lấy thông tin chi tiết của một DVD theo ID
-     *
-     * @param dvdId ID của DVD cần truy vấn
-     * @return Đối tượng DVD chứa thông tin chi tiết, hoặc null nếu không tìm thấy
-     */
     public DVD getDVDInfo(int dvdId) {
         DVD dvd = null;
         String sql = "SELECT p.product_id, p.title, p.category, p.value, p.price," +
@@ -61,12 +47,6 @@ public class DVDController extends ProductController {
         return dvd;
     }
 
-    /**
-     * Thêm DVD mới vào cơ sở dữ liệu
-     *
-     * @param dvd Đối tượng DVD cần thêm
-     * @return true nếu thêm thành công, false nếu có lỗi
-     */
     public boolean addDVD(DVD dvd) {
         Connection conn = null;
         PreparedStatement pstmtDVD = null;
@@ -76,13 +56,10 @@ public class DVDController extends ProductController {
             conn = DatabaseConnector.getConnection();
             conn.setAutoCommit(false);
 
-            // Ensure the category is always set to "DVD" (uppercase) to satisfy the DB constraint
             dvd.setCategory("DVD");
 
-            // Sử dụng ProductDAO để thêm vào bảng Products
             int productId = ProductDAO.insertProduct(dvd, conn);
 
-            // Sau đó thêm vào bảng DVDs
             String sqlDVD = "INSERT INTO DVDs (dvd_id, disc_type, director, runtime, studio, language, " +
                             "subtitles, release_date, genre) " +
                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -123,12 +100,6 @@ public class DVDController extends ProductController {
         return success;
     }
 
-    /**
-     * Cập nhật thông tin DVD trong cơ sở dữ liệu
-     *
-     * @param dvd Đối tượng DVD cần cập nhật
-     * @return true nếu cập nhật thành công, false nếu có lỗi
-     */
     public boolean updateDVD(DVD dvd) {
         Connection conn = null;
         PreparedStatement pstmtDVD = null;
@@ -138,10 +109,8 @@ public class DVDController extends ProductController {
             conn = DatabaseConnector.getConnection();
             conn.setAutoCommit(false);
 
-            // Cập nhật bảng Products
             ProductDAO.updateProduct(dvd, conn);
 
-            // Cập nhật bảng DVDs
             String sqlDVD = "UPDATE DVDs SET disc_type = ?, director = ?, runtime = ?, studio = ?, " +
                             "language = ?, subtitles = ?, release_date = ?, genre = ? " +
                             "WHERE dvd_id = ?";
@@ -182,12 +151,6 @@ public class DVDController extends ProductController {
         return success;
     }
 
-    /**
-     * Xóa DVD theo ID
-     *
-     * @param dvdId ID của DVD cần xóa
-     * @return true nếu xóa thành công, false nếu có lỗi
-     */
     public boolean deleteDVD(int dvdId) {
         Connection conn = null;
         boolean success = false;
@@ -210,13 +173,6 @@ public class DVDController extends ProductController {
         return success;
     }
 
-    /**
-     * Tạo đối tượng DVD từ ResultSet
-     *
-     * @param rs ResultSet chứa dữ liệu DVD
-     * @return Đối tượng DVD
-     * @throws SQLException Nếu có lỗi khi truy xuất dữ liệu
-     */
     private DVD createDVDFromResultSet(ResultSet rs) throws SQLException {
         DVD dvd = new DVD();
         ProductResultSetUtil.fillProductFieldsFromResultSet(dvd, rs);
